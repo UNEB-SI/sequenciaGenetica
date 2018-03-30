@@ -78,35 +78,55 @@ function gerarComplementar(){
 
 function separarCodons(){
 	$novo = file('complementar.txt');
+	$codon1 = [];
+	$codon2 = [];
+	$codon3 = [];
+
 	foreach ($novo as $key => $value) {
 		$x = str_split($value);
+		//print_r($x);
 		$tam = sizeof($x); //462
 
 		for ($z=0; $z < $tam; $z+=3) { 
-			$b = $x[$z].$x[$z+1].$x[$z+2];
-			$frame1 = str_split($b,3);
-			//print_r($frame1);
+			$b = $x[$z].$x[$z+1].$x[$z+2];		
+			array_push($codon1, $b);
 		}
+		//print_r($codon1);
 
 		for ($i=1; $i < $tam-2; $i+=3) { //sobram dois
 			$y = $x[$i].$x[$i+1].$x[$i+2];
-			$frame2 = str_split($y,3);
-			//print_r($frame2);
+			array_push($codon2, $y);
 		}
+		//print_r($codon2);
+
 
 		for ($j=2; $j < $tam-1; $j+=3) { 
 			$a = $x[$j].$x[$j+1].$x[$j+2];
-			$frame3 = str_split($a,3);
-			print_r($frame3);
+			array_push($codon3, $a);
+		}
+		//print_r($codon3);
+		gerarFrames($codon1, $codon2, $codon3);
+	}
+}
+
+function gerarFrames($array1, $array2, $array3){
+	$tamCod1= sizeof($array1);
+	$tamCod2= sizeof($array2);
+	$tamCod3= sizeof($array3);
+	$arrayFrames = array();
+
+	//print_r($array1);
+
+	for ($i=0; $i < $tamCod1; $i++) { 
+		if ($array1[$i] == 'ATG'){
+			$arrayFrames['posicaoInicial'] =$i;
+			print_r($arrayFrames);
 
 		}
-		
 	}
 
-
-
-
 }
+
 
 
 separarCodons();
