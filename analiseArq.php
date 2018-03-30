@@ -51,9 +51,9 @@ function gerarComplementar(){
 
 	foreach ($newFile as $key => $value) {
 		$stringArray = str_split($value);
-		$tam = count($stringArray);
+		$tam = sizeof($stringArray);
 
-		print_r($stringArray);
+		//print_r($stringArray);
 
 		for($i=0; $i < $tam; $i+=2) {
 	        $aux = $stringArray[$i];
@@ -68,16 +68,50 @@ function gerarComplementar(){
 	    }
 	}
 
+	fclose($novo);
+	
 	/*for($i = 0; $i < $tam; $i++) {
 		$escreve = fwrite($newFile, $stringArray[$i]);	
 	
     }  */
 }
 
+function separarCodons(){
+	$novo = file('complementar.txt');
+	foreach ($novo as $key => $value) {
+		$x = str_split($value);
+		//print_r($x);
+
+		for ($z=0; $z < sizeof($x)-2; $z+=3) { 
+			$b = $x[$z].$x[$z+1].$x[$z+2];
+			$frame1 = str_split($b,3);
+			//print_r($frame1);
+		}
+
+		for ($i=1; $i < sizeof($x)-1; $i+=3) { 
+			$y = $x[$i].$x[$i+1].$x[$i+2];
+			$frame2 = str_split($y,3);
+			//print_r($frame2);
+		}
+
+		for ($j=2; $j < sizeof($x); $j+=3) { 
+			$a = $x[$j].$x[$j+1].$x[$j+2];
+			$frame3 = str_split($a,3);
+			print_r($frame3);
+
+		}
+		
+	}
 
 
+
+
+}
+
+
+separarCodons();
 //separandoSeq();
-gerarComplementar();
+//gerarComplementar();
 
 
 ?>
