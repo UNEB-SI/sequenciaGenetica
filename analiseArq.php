@@ -109,23 +109,32 @@ function separarCodons(){
 	}
 }
 
-function gerarFrames($array1, $array2, $array3){
+function gerarFrames($array1, $array2, $array3){ // incompleto, pensar mais
 	$tamCod1= sizeof($array1);
 	$tamCod2= sizeof($array2);
 	$tamCod3= sizeof($array3);
 	$arrayFrames = array();
 
-	//print_r($array1);
+	print_r($array1);
 
 	for ($i=0; $i < $tamCod1; $i++) { 
-		if ($array1[$i] == 'ATG'){
+		if ($array1[$i] == 'ATG' || $array1[$i] == 'CTG' || $array1[$i] =='ATT'|| $array1[$i] =='ATA' 
+			|| $array1[$i] =='GTG' || $array1[$i] == 'TTG'){ //considerando que timinia será trocada por uracila, o t será usado
 			$arrayFrames['posicaoInicial'] =$i;
-			print_r($arrayFrames);
-
+			print_r($arrayFrames['posicaoInicial']);
+		
 		}
+		if ($array1[$i] == 'TAA' || $array1[$i] == 'TAG' || $array1[$i] == 'TGA'){
+				$arrayFrames['posicaoFinal'] =$i;
+			//print_r($arrayFrames);
+		}	
 	}
 
 }
+
+/*
+falta ver a melhor forma de salvar as posições iniciais e finais, printar em qual frame o gene se encontra, determinar os aminoácidos da proteína codificada, usando a tabela.
+*/
 
 
 
