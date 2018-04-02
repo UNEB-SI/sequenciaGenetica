@@ -3,8 +3,6 @@
 function eliminarLinha(){
 
 	$arquivo = file("Bioinfo_TestSequence_Complete_Genome_FASTA.txt") or die("Error");
-	$aux = 0;
-	$qntd = 0;
 
 	unset($arquivo[0]);
 
@@ -17,20 +15,27 @@ function eliminarLinha(){
 }
 
 function separandoSeq(){
-	$newFile = fopen('newCode.txt', 'r') or die("Error");
+	
+	$newFile = file_get_contents('newCode.txt')or die("Error");
+	$arqvInvert = strrev($newFile);
+
+	$arquivoInvertido = file_put_contents('arquivoInvertido.txt', $arqvInvert);
+	$fileAberto = fopen('arquivoInvertido.txt', 'r');
+
+	//print_r($arquivoInvertido); 
 	$aux = 0;
 	$count = 803;
 
-	while (!feof($newFile)) {
-		$linha = fgetc($newFile);
+	while (!feof($fileAberto)) {
+		$linha = fgetc($fileAberto);
 		$qntd = strlen(trim($linha));	
 		$aux = $qntd + $aux;
-
+		
 		if($aux == 803){			
 			$seqNova = 'seqNova.txt';
 			$fileNew = fopen($seqNova, 'a');
 			while ($count <= 1264) {
-				$linha = fgetc($newFile);
+				$linha = fgetc($fileAberto);
 				$qntd = strlen(trim($linha));	
 				$escreve = fwrite($fileNew, trim($linha));	
 				$count = $qntd + $count;
@@ -39,8 +44,8 @@ function separandoSeq(){
 			}		
 		}
 	}
-	fclose($newFile);
-	echo $count;
+	fclose($fileAberto);
+	//echo $count;
 	//echo $aux;
 }	
 
@@ -138,9 +143,9 @@ falta ver a melhor forma de salvar as posições iniciais e finais, printar em q
 
 
 
-separarCodons();
+//separarCodons();
 //separandoSeq();
-//gerarComplementar();
+gerarComplementar();
 
 
 ?>
