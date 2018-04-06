@@ -1,10 +1,26 @@
 <?php
 
-function eliminarLinha(){
+set_time_limit(0);
+if (!empty($_POST)) {
 
+	if(isset($_POST['fita']) && isset($_POST['posicaoInicial']) && isset($_POST["posicaoFinal"])){
+	    $fita = $_POST["fita"];
+		$posicaoInicial = $_POST["posicaoInicial"];
+		$posicaoFinal = $_POST["posicaoFinal"];
+
+	    eliminarLinha($posicaoInicial, $posicaoFinal, $fita);
+
+	} else{
+		echo "<div class='alert alert-danger' role='alert'>
+	  			Valores indefinidos
+			</div>";
+	}
+}else{
+	echo "Não houve submit no formulário";
+}
+
+function eliminarLinha($posicaoInicial, $posicaoFinal, $fita){
 	$arquivo = file("Bioinfo_TestSequence_Complete_Genome_FASTA.txt") or die("Error");
-	print_r($arquivo);
-
 	unset($arquivo[0]);
 
 	foreach ($arquivo as $key => $value) {
@@ -12,39 +28,53 @@ function eliminarLinha(){
 		$file = fopen($novo, 'a');
 		$writeArq = fwrite($file, $value);	
 	}
-	
+
+	separandoSeq($posicaoInicial, $posicaoFinal, $fita);
 }
 
-function separandoSeq(){	
-	$newFile = file_get_contents('newCode.txt')or die("Error");
-	$arqvInvert = strrev($newFile);
+function separandoSeq($posIni, $posFim, $fita){	
+	
+	if($fita == 'negativa'){
+		$newFile = file_get_contents('newCode.txt')or die("Error");
+		$arqvInvert = strrev($newFile);
 
-	$arquivoInvertido = file_put_contents('arquivoInvertido.txt', $arqvInvert);
-	$fileAberto = fopen('arquivoInvertido.txt', 'r');
+		$arquivoInvertido = file_put_contents('arquivoInvertido.txt', $arqvInvert);
+		$fileAberto = fopen('arquivoInvertido.txt', 'r');
+		escreverArquivo($posIni, $posFim, $fileAberto);
 
+	} else {
+		$newFile = fopen('newCode.txt', 'r') or die("Error");
+		escreverArquivo($posIni, $posFim, $newFile);
+	}		
+}	
+
+function escreverArquivo($posIni, $posFim, $file){
 	$aux = 0;
-	$count = 803;
+	$count = $posIni;
 
-	while (!feof($fileAberto)) {
-		$linha = fgetc($fileAberto);
+	while (!feof($file)) {
+		$linha = fgetc($file);
 		$qntd = strlen(trim($linha));	
 		$aux = $qntd + $aux;
 		
-		if($aux == 803){			
+		if($aux == $posIni){			
 			$seqNova = 'seqNova.txt';
 			$fileNew = fopen($seqNova, 'a');
-			while ($count <= 1264) {
-				$linha = fgetc($fileAberto);
+			while ($count <= $posFim) {
+				$linha = fgetc($file);
 				$qntd = strlen(trim($linha));	
 				$escreve = fwrite($fileNew, trim($linha));	
 				$count = $qntd + $count;
 			}		
 		}
 	}
-	fclose($fileAberto);
-}	
+
+	fclose($file);
+	gerarComplementar();
+}
 
 function gerarComplementar(){
+
 	$newFile = file('seqNova.txt') or die("Error");
 
 	$complementar = 'complementar.txt';
@@ -75,8 +105,7 @@ function gerarComplementar(){
 	fclose($novo);
 }
 
-function codigoGenetico(){
-
+function encontrarAminoacido(){
 	
 }
 
@@ -144,10 +173,10 @@ function gerarFrames($array1, $array2, $array3){ // incompleto, pensar mais
 o gene codificante tem que ser m
 falta ver a melhor forma de salvar as posições iniciais e finais, printar em qual frame o gene se encontra, determinar os aminoácidos da proteína codificada, usando a tabela.
 */
-
+//escolhendoSeq();
 //eliminarLinha();
 //separarCodons();
 //separandoSeq();
-gerarComplementar();
+//gerarComplementar();
 
 ?>
