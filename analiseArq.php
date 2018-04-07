@@ -117,29 +117,26 @@ function encontrarAminoacido(){
 		$codons = str_split($value);
 		$tam = sizeof($codons);
 
-		while($count != $tam){
-			$codon = $codons[$count].$codons[$count+1].$codons[$count+2];
-			if($codon == $startCodon){
+		for ($i=0; $i < $tam; $i++) { 
+			$codon = $codons[$i].$codons[$i+1].$codons[$i+2];
+			if ($codon == $startCodon){
 				array_push($sequenciaCodificada, $codon);
-				for ($i=$count+3; $i<=$tam ; $i+=3) { //rever isso aqui
-					print_r($i);
-					echo "</br>";
-					$codon = $codons[$i].$codons[$i+1].$codons[$i+2];
-					array_push($sequenciaCodificada, $codon);
+				for ($j=$i +3; $j < $tam; $j+=3) { 
+					$codon = $codons[$j].$codons[$j+1].$codons[$j+2];
 					if(in_array($codon, $stopCodon)){
-						$count = $i;
+						array_push($sequenciaCodificada, $codon);
 						echo "<div class='alert alert-success' role='alert'>
 					  			Final de Sequência Encontrada!
 							</div>";
-					exit;
+						print_r($sequenciaCodificada);
 
+						exit;	
+					} else{
+						array_push($sequenciaCodificada, $codon);
 					}
 				}
 			}
-			//$count++;
 		}
-		print_r($sequenciaCodificada);
-		exit();
 	}
 
 	/*while (!feof($complementar)) {
