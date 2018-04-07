@@ -105,7 +105,8 @@ function gerarComplementar(){
 	fclose($novo);
 }
 
-function dicionarioAminoacidos(){
+function dicionarioAminoacidos($codon){
+
 	$aminoacidos = [];
 	$aminoacidos['TTT'] = 'Fenilanina';
 	$aminoacidos['TTC'] = 'Fenilanina';
@@ -172,6 +173,12 @@ function dicionarioAminoacidos(){
 	$aminoacidos['GGA'] = 'Glicina';
 	$aminoacidos['GGG'] = 'Glicina';
 
+	print_r($aminoacidos);
+
+	if(in_array($aminoacidos[$codon], $codon )){
+		echo "string";
+		exit();
+	}
 }
 
 function encontrarAminoacido(){
@@ -195,11 +202,7 @@ function encontrarAminoacido(){
 					if(in_array($codon, $stopCodon)){
 						array_push($sequenciaCodificada, $codon);
 						foreach ($sequenciaCodificada as $sequencia) {
-							$pedacoCodon = substr($sequencia, 0, 2);
-							print_r($aminoacidos);
-
-							exit();
-						
+							dicionarioAminoacidos($sequencia);					
 						}
 					} else{
 						array_push($sequenciaCodificada, $codon);
