@@ -109,10 +109,9 @@ function encontrarAminoacido(){
 
 	$complementar = file('complementar.txt') or die('Error');
 	$sequenciaCodificada = array();
-	$stopCodon = ['UAA', 'UAG','UGA'];
+	$stopCodon = ['TAA', 'TAG','TGA'];
 	$startCodon = 'ATG';
 	$count = 0;
-
 
 	foreach ($complementar as $value) {
 		$codons = str_split($value);
@@ -122,29 +121,25 @@ function encontrarAminoacido(){
 			$codon = $codons[$count].$codons[$count+1].$codons[$count+2];
 			if($codon == $startCodon){
 				array_push($sequenciaCodificada, $codon);
-				for ($i=$count; $i<$tam ; $i+=3) { 
-					$codon = $codons[$count].$codons[$count+1].$codons[$count+2];
-					array_push($sequenciaCodificada, $codon);
-					$count++;
-				}
-				print_r($sequenciaCodificada);
-				echo "</br>";
-
-				echo $i;
-				exit;
-
-				/*for ($j=$i; $j < $tam ; $j+=3) { 
+				for ($i=$count+3; $i<=$tam ; $i+=3) { //rever isso aqui
+					print_r($i);
+					echo "</br>";
 					$codon = $codons[$i].$codons[$i+1].$codons[$i+2];
 					array_push($sequenciaCodificada, $codon);
-					print_r($sequenciaCodificada);
-					echo "</br>";
-					
+					if(in_array($codon, $stopCodon)){
+						$count = $i;
+						echo "<div class='alert alert-success' role='alert'>
+					  			Final de Sequência Encontrada!
+							</div>";
+					exit;
 
-				}*/
-
+					}
+				}
 			}
+			//$count++;
 		}
-
+		print_r($sequenciaCodificada);
+		exit();
 	}
 
 	/*while (!feof($complementar)) {
