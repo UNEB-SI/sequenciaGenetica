@@ -105,8 +105,77 @@ function gerarComplementar(){
 	fclose($novo);
 }
 
-function encontrarAminoacido(){
+function dicionarioAminoacidos(){
+	$aminoacidos = [];
+	$aminoacidos['TTT'] = 'Fenilanina';
+	$aminoacidos['TTC'] = 'Fenilanina';
+	$aminoacidos['TTA'] = 'Leucina';
+	$aminoacidos['TTG'] = 'Leucina';
+	$aminoacidos['TCT'] = 'Serina';
+	$aminoacidos['TCC'] = 'Serina';
+	$aminoacidos['TCA'] = 'Serina';
+	$aminoacidos['TCG'] = 'Serina';
+	$aminoacidos['TAT'] = 'Tirosina';
+	$aminoacidos['TAC'] = 'Tirosina';
+	$aminoacidos['TAA'] = 'Stop Codon';
+	$aminoacidos['TAG'] = 'Stop Codon';
+	$aminoacidos['TGT'] = 'Cysteine';
+	$aminoacidos['TGC'] = 'Cysteine';
+	$aminoacidos['TGA'] = 'Stop Codon';
+	$aminoacidos['TGG'] = 'Tryptophan';
+	$aminoacidos['CTT'] = 'Leucina';
+	$aminoacidos['CTC'] = 'Leucina';
+	$aminoacidos['CTA'] = 'Leucina';
+	$aminoacidos['CTG'] = 'Leucina';
+	$aminoacidos['CCT'] = 'Prolina';
+	$aminoacidos['CCC'] = 'Prolina';
+	$aminoacidos['CCA'] = 'Prolina';
+	$aminoacidos['CCG'] = 'Prolina';
+	$aminoacidos['CAT'] = 'Histidina';
+	$aminoacidos['CAC'] = 'Histidina';
+	$aminoacidos['CAA'] = 'Glutamina';
+	$aminoacidos['CAG'] = 'Glutamina';
+	$aminoacidos['CGT'] = 'Arginina';
+	$aminoacidos['CGC'] = 'Arginina';
+	$aminoacidos['CGA'] = 'Arginina';
+	$aminoacidos['CGG'] = 'Arginina';
+	$aminoacidos['ATT'] = 'Isolecina';
+	$aminoacidos['ATC'] = 'Isolecina';
+	$aminoacidos['ATA'] = 'Isolecina';
+	$aminoacidos['ATG'] = 'Metionina';
+	$aminoacidos['ACT'] = 'Treonina';
+	$aminoacidos['ACC'] = 'Treonina';
+	$aminoacidos['ACA'] = 'Treonina';
+	$aminoacidos['ACG'] = 'Treonina';
+	$aminoacidos['AAT'] = 'Asparagina';
+	$aminoacidos['AAC'] = 'Asparagina';
+	$aminoacidos['AAA'] = 'Lisina';
+	$aminoacidos['AAG'] = 'Lisina';
+	$aminoacidos['AGT'] = 'Serina';
+	$aminoacidos['AGC'] = 'Serina';
+	$aminoacidos['AGA'] = 'Arginina';
+	$aminoacidos['AGG'] = 'Arginina';
+	$aminoacidos['GTT'] = 'Valina';
+	$aminoacidos['GTC'] = 'Valina';
+	$aminoacidos['GTA'] = 'Valina';
+	$aminoacidos['GTG'] = 'Valina';
+	$aminoacidos['GCT'] = 'Alanina';
+	$aminoacidos['GCC'] = 'Alanina';
+	$aminoacidos['GCA'] = 'Alanina';
+	$aminoacidos['GCG'] = 'Alanina';
+	$aminoacidos['GAT'] = 'Ácido Aspártico';
+	$aminoacidos['GAC'] = 'Ácido Aspártico';
+	$aminoacidos['GAA'] = 'Ácido Glutâmico';
+	$aminoacidos['GAG'] = 'Ácido Glutâmico';
+	$aminoacidos['GGT'] = 'Glicina';
+	$aminoacidos['GGC'] = 'Glicina';
+	$aminoacidos['GGA'] = 'Glicina';
+	$aminoacidos['GGG'] = 'Glicina';
 
+}
+
+function encontrarAminoacido(){
+	
 	$complementar = file('complementar.txt') or die('Error');
 	$sequenciaCodificada = array();
 	$stopCodon = ['TAA', 'TAG','TGA'];
@@ -125,12 +194,13 @@ function encontrarAminoacido(){
 					$codon = $codons[$j].$codons[$j+1].$codons[$j+2];
 					if(in_array($codon, $stopCodon)){
 						array_push($sequenciaCodificada, $codon);
-						echo "<div class='alert alert-success' role='alert'>
-					  			Final de Sequência Encontrada!
-							</div>";
-						print_r($sequenciaCodificada);
+						foreach ($sequenciaCodificada as $sequencia) {
+							$pedacoCodon = substr($sequencia, 0, 2);
+							print_r($aminoacidos);
 
-						exit;	
+							exit();
+						
+						}
 					} else{
 						array_push($sequenciaCodificada, $codon);
 					}
@@ -139,29 +209,6 @@ function encontrarAminoacido(){
 		}
 	}
 
-	/*while (!feof($complementar)) {
-		$stopCodon 
-	}
-
-	$uu['UU'] = ['UUU','UUC','UUA','UUG'];
-	$uc['UC'] = ['UCU','UCC','UCA','UCG'];
-	$ua['UA'] = ['UAU','UAC','UAA','UAG']; //UAA E UAG SÃO STOP
-	$ug['UG'] = ['UGU','UGC','UGA','UGG']; //UGA É STOP
-	$cu['CU'] = ['CUU','CUC','CUA','CUG'];
-	$cc['CC'] = ['CCU','CCC','CCA','CCG'];
-	$ca['CA'] = ['CAU','CAC','CAA','CAG'];
-	$cg['CG'] = ['CGU','CGC','CGA','CGG'];
-	$au['AU'] = ['AUU','AUC','AUA','AUG']; //MET INICIO
-	$ac['AC'] = ['ACU','ACC','ACA','ACG'];
-	$aa['AA'] = ['AAU','AAC','AAA','AAG'];
-	$ag['AG'] = ['AGU','AGC','AGA','AGG'];
-	$gu['GU'] = ['GUU','GUC','GUA','GUG'];
-	$gc['GC'] = ['GCU','GCC','GCA','GCG'];
-	$ga['GA'] = ['GAU','GAC','GAA','GAG'];
-	$gg['GG'] = ['GGU','GGC','GGA','GGG']; 
-
-	
-	$codons = [$uu,$uc,$ua,$ug,$cu,$cc,$ca,$cg,$au,$ac,$aa,$ag,$gu,$gc,$ga,$gg];
 
 	/*$aminoacidos = ['Fenilanina' => 'Fen','Leucina' => 'Len', 'Serina'=> 'Ser', 'Tirosina' =>'Tir', 'Cysteine' => 'Cis', 'Tryptophan' => 'Trp'  ];
 	$stopCodon = ['UAA', 'UAG','UGA' ];
