@@ -106,8 +106,88 @@ function gerarComplementar(){
 }
 
 function encontrarAminoacido(){
+
+	$complementar = file('complementar.txt') or die('Error');
+	$sequenciaCodificada = array();
+	$stopCodon = ['UAA', 'UAG','UGA'];
+	$startCodon = 'ATG';
+	$count = 0;
+
+
+	foreach ($complementar as $value) {
+		$codons = str_split($value);
+		$tam = sizeof($codons);
+
+		while($count != $tam){
+			$codon = $codons[$count].$codons[$count+1].$codons[$count+2];
+			if($codon == $startCodon){
+				array_push($sequenciaCodificada, $codon);
+				for ($i=$count; $i<$tam ; $i+=3) { 
+					$codon = $codons[$count].$codons[$count+1].$codons[$count+2];
+					array_push($sequenciaCodificada, $codon);
+					$count++;
+				}
+				print_r($sequenciaCodificada);
+				echo "</br>";
+
+				echo $i;
+				exit;
+
+				/*for ($j=$i; $j < $tam ; $j+=3) { 
+					$codon = $codons[$i].$codons[$i+1].$codons[$i+2];
+					array_push($sequenciaCodificada, $codon);
+					print_r($sequenciaCodificada);
+					echo "</br>";
+					
+
+				}*/
+
+			}
+		}
+
+	}
+
+	/*while (!feof($complementar)) {
+		$stopCodon 
+	}
+
+	$uu['UU'] = ['UUU','UUC','UUA','UUG'];
+	$uc['UC'] = ['UCU','UCC','UCA','UCG'];
+	$ua['UA'] = ['UAU','UAC','UAA','UAG']; //UAA E UAG SÃO STOP
+	$ug['UG'] = ['UGU','UGC','UGA','UGG']; //UGA É STOP
+	$cu['CU'] = ['CUU','CUC','CUA','CUG'];
+	$cc['CC'] = ['CCU','CCC','CCA','CCG'];
+	$ca['CA'] = ['CAU','CAC','CAA','CAG'];
+	$cg['CG'] = ['CGU','CGC','CGA','CGG'];
+	$au['AU'] = ['AUU','AUC','AUA','AUG']; //MET INICIO
+	$ac['AC'] = ['ACU','ACC','ACA','ACG'];
+	$aa['AA'] = ['AAU','AAC','AAA','AAG'];
+	$ag['AG'] = ['AGU','AGC','AGA','AGG'];
+	$gu['GU'] = ['GUU','GUC','GUA','GUG'];
+	$gc['GC'] = ['GCU','GCC','GCA','GCG'];
+	$ga['GA'] = ['GAU','GAC','GAA','GAG'];
+	$gg['GG'] = ['GGU','GGC','GGA','GGG']; 
+
 	
+	$codons = [$uu,$uc,$ua,$ug,$cu,$cc,$ca,$cg,$au,$ac,$aa,$ag,$gu,$gc,$ga,$gg];
+
+	/*$aminoacidos = ['Fenilanina' => 'Fen','Leucina' => 'Len', 'Serina'=> 'Ser', 'Tirosina' =>'Tir', 'Cysteine' => 'Cis', 'Tryptophan' => 'Trp'  ];
+	$stopCodon = ['UAA', 'UAG','UGA' ];
+	
+	$d = array_map(null, $a, $b, $c);
+
+	//print_r($aminoacidos);
+
+	foreach ($codons as $key => $codon) {
+		if($codons[$key] == )
+		print_r($codons[$key]);
+						
+	}*/
+	//print_r($aminoacido);
+
 }
+
+encontrarAminoacido();
 
 
 
