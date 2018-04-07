@@ -103,9 +103,13 @@ function gerarComplementar(){
 	}
 
 	fclose($novo);
+	encontrarAminoacido();
 }
 
-function dicionarioAminoacidos($codon){
+function dicionarioAminoacidos($sequencia){
+
+	/*print_r($sequencia);
+	exit();*/
 
 	$aminoacidos = [];
 	$aminoacidos['TTT'] = 'Fenilanina';
@@ -173,12 +177,12 @@ function dicionarioAminoacidos($codon){
 	$aminoacidos['GGA'] = 'Glicina';
 	$aminoacidos['GGG'] = 'Glicina';
 
-	print_r($aminoacidos);
-
-	if(in_array($aminoacidos[$codon], $codon )){
-		echo "string";
-		exit();
+	foreach ($sequencia as $key => $value) {
+		print_r($aminoacidos[$value]);
+		echo "</br>";
 	}
+
+	
 }
 
 function encontrarAminoacido(){
@@ -187,7 +191,6 @@ function encontrarAminoacido(){
 	$sequenciaCodificada = array();
 	$stopCodon = ['TAA', 'TAG','TGA'];
 	$startCodon = 'ATG';
-	$count = 0;
 
 	foreach ($complementar as $value) {
 		$codons = str_split($value);
@@ -201,9 +204,8 @@ function encontrarAminoacido(){
 					$codon = $codons[$j].$codons[$j+1].$codons[$j+2];
 					if(in_array($codon, $stopCodon)){
 						array_push($sequenciaCodificada, $codon);
-						foreach ($sequenciaCodificada as $sequencia) {
-							dicionarioAminoacidos($sequencia);					
-						}
+						dicionarioAminoacidos($sequenciaCodificada);
+						exit();
 					} else{
 						array_push($sequenciaCodificada, $codon);
 					}
@@ -211,22 +213,6 @@ function encontrarAminoacido(){
 			}
 		}
 	}
-
-
-	/*$aminoacidos = ['Fenilanina' => 'Fen','Leucina' => 'Len', 'Serina'=> 'Ser', 'Tirosina' =>'Tir', 'Cysteine' => 'Cis', 'Tryptophan' => 'Trp'  ];
-	$stopCodon = ['UAA', 'UAG','UGA' ];
-	
-	$d = array_map(null, $a, $b, $c);
-
-	//print_r($aminoacidos);
-
-	foreach ($codons as $key => $codon) {
-		if($codons[$key] == )
-		print_r($codons[$key]);
-						
-	}*/
-	//print_r($aminoacido);
-
 }
 
 encontrarAminoacido();
