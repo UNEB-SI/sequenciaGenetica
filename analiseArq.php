@@ -180,6 +180,7 @@ function dicionarioAminoacidos($sequencia, $posicao){
 
 	$frame = $posicao - 3 * floor($posicao-1/3);
 	echo "Frame => ". $frame;
+	echo "</br>";
 
 	foreach ($sequencia as $key => $value) {
 		echo "Códon =>" . $value . ' - ' ;
