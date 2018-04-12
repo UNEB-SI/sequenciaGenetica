@@ -1,6 +1,9 @@
 <?php
+//gtt antepenultimo
+// taa ultimo
 
 set_time_limit(0);
+
 if (!empty($_POST)) {
 
 	if(isset($_POST['fita']) && isset($_POST['posicaoInicial']) && isset($_POST["posicaoFinal"])){
@@ -19,26 +22,20 @@ if (!empty($_POST)) {
 	echo "Não houve submit no formulário";
 }
 
-function apagarArquivo($arquivo){
-	if (file_exists($arquivo)) {
-    	unlink($arquivo);
-	} 
-}
-
 function eliminarLinha($posicaoInicial, $posicaoFinal, $fita){
 	$arquivo = file("Bioinfo_TestSequence_Complete_Genome_FASTA.txt") or die("Error");
 	unset($arquivo[0]);
 	$novo = 'newCode.txt';
 
 	foreach ($arquivo as $key => $value) {
-		$file = fopen($novo, 'a');
-		$writeArq = fwrite($file, $value);	
+		$file = fopen($novo, 'a');				
+		$string = trim(preg_replace('/\s+/', ' ', $value));
+		$writeArq = fwrite($file, $string);		
 	}
-
-	separandoSeq($posicaoInicial, $posicaoFinal, $fita);
+	escreverArquivo($posicaoInicial, $posicaoFinal, $fita);
 }
 
-function separandoSeq($posIni, $posFim, $fita){	
+/*function separandoSeq($posIni, $posFim){	
 	
 	if($fita == 'negativa'){
 		$newFile = file_get_contents('newCode.txt')or die("Error");
@@ -51,57 +48,91 @@ function separandoSeq($posIni, $posFim, $fita){
 		$newFile = fopen('newCode.txt', 'r') or die("Error");
 		escreverArquivo($posIni, $posFim, $newFile);
 	}		
-}	
+}	*/
 
-function escreverArquivo($posIni, $posFim, $file){
+function escreverArquivo($posIni, $posFim, $fita){
+
 	$aux = 0;
 	$count = $posIni;
 	$seqNova = 'seqNova.txt';
+	$file = fopen('newCode.txt', 'r') or die("Error");	
 
 	while (!feof($file)) {
 		$linha = fgetc($file);
-		$qntd = strlen(trim($linha));	
+		$qntd = strlen($linha);	
 		$aux = $qntd + $aux;
-		
-		if($aux == $posIni){			
+
+		if($aux == $posIni){	
 			$fileNew = fopen($seqNova, 'a');
-			while ($count <= $posFim) {
-				$linha = fgetc($file);
-				$qntd = strlen(trim($linha));	
-				$escreve = fwrite($fileNew, trim($linha));	
-				$count = $qntd + $count;
+			$escreve = fwrite($fileNew, $linha);
+			
+			while ($count < $posFim) {	
+				$linha_1 = fgetc($file);
+				$qntd_1 = strlen($linha_1);	
+				$escreve = fwrite($fileNew, $linha_1);	
+				$count = $qntd_1 + $count;
 			}		
 		}
 	}
 
 	fclose($file);
-	gerarComplementar();
+	gerarComplementar($fita);
 }
 
-function gerarComplementar(){
+function gerarComplementar($fita){
 
-	$newFile = file('seqNova.txt') or die("Error");
 	$complementar = 'complementar.txt';
 	$novo = fopen($complementar, 'a');
 
-	foreach ($newFile as $key => $value) {
-		$stringArray = str_split($value);
-		foreach ($stringArray as $key => $value) {
-			if($stringArray[$key] == 'T'){
-				$trocandoT = str_replace('T', 'A', $stringArray[$key]);
-				$escreve = fwrite($novo, $trocandoT);
+	if($fita == 'negativa'){
+		$arquivo = file_get_contents('seqNova.txt')or die("Error");
+		$arqvInvert = strrev($arquivo);
 
-			} elseif ($stringArray[$key] == 'A') {
-				$trocandoA = str_replace('A', 'T', $stringArray[$key]);
-				$escreve = fwrite($novo, $trocandoA);
+		$arquivoInvertido = file_put_contents('arquivoInvertido.txt', $arqvInvert);
+		$fileAberto = file('arquivoInvertido.txt');
 
-			} elseif ($stringArray[$key] == 'C') {
-				$trocandoC = str_replace('C', 'G', $stringArray[$key]);
-				$escreve = fwrite($novo, $trocandoC);
+		foreach ($fileAberto as $arquivoArbeto) {
+			$stringArray = str_split($arquivoArbeto);
+			foreach ($stringArray as $key => $value) {
+				if($stringArray[$key] == 'T'){
+					$trocandoT = str_replace('T', 'A', $stringArray[$key]);
+					$escreve = fwrite($novo, $trocandoT);
 
-			} elseif ($stringArray[$key] == 'G') {
-				$trocandoG = str_replace('G', 'C', $stringArray[$key]);
-				$escreve = fwrite($novo, $trocandoG);
+				} elseif ($stringArray[$key] == 'A') {
+					$trocandoA = str_replace('A', 'T', $stringArray[$key]);
+					$escreve = fwrite($novo, $trocandoA);
+
+				} elseif ($stringArray[$key] == 'C') {
+					$trocandoC = str_replace('C', 'G', $stringArray[$key]);
+					$escreve = fwrite($novo, $trocandoC);
+
+				} elseif ($stringArray[$key] == 'G') {
+					$trocandoG = str_replace('G', 'C', $stringArray[$key]);
+					$escreve = fwrite($novo, $trocandoG);
+				}
+			}
+		}
+	}else{
+		$newFile = file('seqNova.txt') or die("Error");
+		foreach ($newFile as $value_1) {
+			$stringArray = str_split($value_1);
+			foreach ($stringArray as $key => $value) {
+				if($stringArray[$key] == 'T'){
+					$trocandoT = str_replace('T', 'A', $stringArray[$key]);
+					$escreve = fwrite($novo, $trocandoT);
+
+				} elseif ($stringArray[$key] == 'A') {
+					$trocandoA = str_replace('A', 'T', $stringArray[$key]);
+					$escreve = fwrite($novo, $trocandoA);
+
+				} elseif ($stringArray[$key] == 'C') {
+					$trocandoC = str_replace('C', 'G', $stringArray[$key]);
+					$escreve = fwrite($novo, $trocandoC);
+
+				} elseif ($stringArray[$key] == 'G') {
+					$trocandoG = str_replace('G', 'C', $stringArray[$key]);
+					$escreve = fwrite($novo, $trocandoG);
+				}
 			}
 		}
 	}
@@ -113,70 +144,70 @@ function gerarComplementar(){
 function dicionarioAminoacidos($sequencia, $posicao){
 
 	$aminoacidos = [];
-	$aminoacidos['TTT'] = 'Fenilanina';
-	$aminoacidos['TTC'] = 'Fenilanina';
-	$aminoacidos['TTA'] = 'Leucina';
-	$aminoacidos['TTG'] = 'Leucina';
-	$aminoacidos['TCT'] = 'Serina';
-	$aminoacidos['TCC'] = 'Serina';
-	$aminoacidos['TCA'] = 'Serina';
-	$aminoacidos['TCG'] = 'Serina';
-	$aminoacidos['TAT'] = 'Tirosina';
-	$aminoacidos['TAC'] = 'Tirosina';
+	$aminoacidos['TTT'] = 'F';//Fenilanina
+	$aminoacidos['TTC'] = 'F';//Fenilanina
+	$aminoacidos['TTA'] = 'L'; //leucina
+	$aminoacidos['TTG'] = 'L'; //leucina
+	$aminoacidos['TCT'] = 'S'; //serina
+	$aminoacidos['TCC'] = 'S'; //serina
+	$aminoacidos['TCA'] = 'S'; //serina
+	$aminoacidos['TCG'] = 'S'; //serina
+	$aminoacidos['TAT'] = 'Y'; //tirosina
+	$aminoacidos['TAC'] = 'Y'; //tirosina
 	$aminoacidos['TAA'] = 'Stop Codon';
 	$aminoacidos['TAG'] = 'Stop Codon';
-	$aminoacidos['TGT'] = 'Cysteine';
-	$aminoacidos['TGC'] = 'Cysteine';
+	$aminoacidos['TGT'] = 'C'; //cisteina
+	$aminoacidos['TGC'] = 'C'; //cisteina
 	$aminoacidos['TGA'] = 'Stop Codon';
-	$aminoacidos['TGG'] = 'Tryptophan';
-	$aminoacidos['CTT'] = 'Leucina';
-	$aminoacidos['CTC'] = 'Leucina';
-	$aminoacidos['CTA'] = 'Leucina';
-	$aminoacidos['CTG'] = 'Leucina';
-	$aminoacidos['CCT'] = 'Prolina';
-	$aminoacidos['CCC'] = 'Prolina';
-	$aminoacidos['CCA'] = 'Prolina';
-	$aminoacidos['CCG'] = 'Prolina';
-	$aminoacidos['CAT'] = 'Histidina';
-	$aminoacidos['CAC'] = 'Histidina';
-	$aminoacidos['CAA'] = 'Glutamina';
-	$aminoacidos['CAG'] = 'Glutamina';
-	$aminoacidos['CGT'] = 'Arginina';
-	$aminoacidos['CGC'] = 'Arginina';
-	$aminoacidos['CGA'] = 'Arginina';
-	$aminoacidos['CGG'] = 'Arginina';
-	$aminoacidos['ATT'] = 'Isolecina';
-	$aminoacidos['ATC'] = 'Isolecina';
-	$aminoacidos['ATA'] = 'Isolecina';
-	$aminoacidos['ATG'] = 'Metionina';
-	$aminoacidos['ACT'] = 'Treonina';
-	$aminoacidos['ACC'] = 'Treonina';
-	$aminoacidos['ACA'] = 'Treonina';
-	$aminoacidos['ACG'] = 'Treonina';
-	$aminoacidos['AAT'] = 'Asparagina';
-	$aminoacidos['AAC'] = 'Asparagina';
-	$aminoacidos['AAA'] = 'Lisina';
-	$aminoacidos['AAG'] = 'Lisina';
-	$aminoacidos['AGT'] = 'Serina';
-	$aminoacidos['AGC'] = 'Serina';
-	$aminoacidos['AGA'] = 'Arginina';
-	$aminoacidos['AGG'] = 'Arginina';
-	$aminoacidos['GTT'] = 'Valina';
-	$aminoacidos['GTC'] = 'Valina';
-	$aminoacidos['GTA'] = 'Valina';
-	$aminoacidos['GTG'] = 'Valina';
-	$aminoacidos['GCT'] = 'Alanina';
-	$aminoacidos['GCC'] = 'Alanina';
-	$aminoacidos['GCA'] = 'Alanina';
-	$aminoacidos['GCG'] = 'Alanina';
-	$aminoacidos['GAT'] = 'Ácido Aspártico';
-	$aminoacidos['GAC'] = 'Ácido Aspártico';
-	$aminoacidos['GAA'] = 'Ácido Glutâmico';
-	$aminoacidos['GAG'] = 'Ácido Glutâmico';
-	$aminoacidos['GGT'] = 'Glicina';
-	$aminoacidos['GGC'] = 'Glicina';
-	$aminoacidos['GGA'] = 'Glicina';
-	$aminoacidos['GGG'] = 'Glicina';
+	$aminoacidos['TGG'] = 'W'; //triptofano
+	$aminoacidos['CTT'] = 'L'; //leucina
+	$aminoacidos['CTC'] = 'L';//leucina
+	$aminoacidos['CTA'] = 'L'; //leucina
+	$aminoacidos['CTG'] = 'L'; //leucina
+	$aminoacidos['CCT'] = 'P';//prolina
+	$aminoacidos['CCC'] = 'P'; //prolina
+	$aminoacidos['CCA'] = 'P'; //prolina
+	$aminoacidos['CCG'] = 'P'; //prolina
+	$aminoacidos['CAT'] = 'H';//Histidina
+	$aminoacidos['CAC'] = 'H'; //histidina
+	$aminoacidos['CAA'] = 'Q'; //glutamina
+	$aminoacidos['CAG'] = 'Q'; //glutamina
+	$aminoacidos['CGT'] = 'R'; //arginina
+	$aminoacidos['CGC'] = 'R'; //arginina
+	$aminoacidos['CGA'] = 'R';//arginina
+	$aminoacidos['CGG'] = 'R';//arginina
+	$aminoacidos['ATT'] = 'I'; //Isolecina
+	$aminoacidos['ATC'] = 'I';//Isolecina
+	$aminoacidos['ATA'] = 'I';//Isolecina
+	$aminoacidos['ATG'] = 'M'; // METionina
+	$aminoacidos['ACT'] = 'T'; //treonina
+	$aminoacidos['ACC'] = 'T'; //treonina
+	$aminoacidos['ACA'] = 'T'; //treonina
+	$aminoacidos['ACG'] = 'T'; //treonina
+	$aminoacidos['AAT'] = 'N'; //asparagina
+	$aminoacidos['AAC'] = 'N'; //asparagina
+	$aminoacidos['AAA'] = 'K'; //lisina
+	$aminoacidos['AAG'] = 'K'; //lisina
+	$aminoacidos['AGT'] = 'S'; //serina
+	$aminoacidos['AGC'] = 'S'; //serina
+ 	$aminoacidos['AGA'] = 'R'; //arginina
+	$aminoacidos['AGG'] = 'R'; //arginina
+	$aminoacidos['GTT'] = 'V'; //valina
+	$aminoacidos['GTC'] = 'V'; //valina
+	$aminoacidos['GTA'] = 'V'; //valina
+	$aminoacidos['GTG'] = 'V'; //valina
+	$aminoacidos['GCT'] = 'A'; //alanina
+	$aminoacidos['GCC'] = 'A'; //alanina
+	$aminoacidos['GCA'] = 'A'; //alanina
+	$aminoacidos['GCG'] = 'A'; //alanina
+	$aminoacidos['GAT'] = 'D'; //aspartato
+	$aminoacidos['GAC'] = 'D';//aspartato
+	$aminoacidos['GAA'] = 'E';//Ácido Glutâmico
+	$aminoacidos['GAG'] = 'E';//Ácido Glutâmico
+	$aminoacidos['GGT'] = 'G'; //glicina
+	$aminoacidos['GGC'] = 'G'; //glicina
+	$aminoacidos['GGA'] = 'G'; //glicina
+	$aminoacidos['GGG'] = 'G';//glicina
 
 	$frame = $posicao - 3 * floor($posicao-1/3);
 	echo "Frame => ". $frame;
@@ -202,12 +233,12 @@ function encontrarAminoacido(){
 		$codons = str_split($value);
 		$tam = sizeof($codons);
 
-		for ($i=0; $i < $tam; $i++) { 
+		for ($i=0; $i <= $tam; $i++) { 
 			$codon = $codons[$i].$codons[$i+1].$codons[$i+2];
 			if ($codon == $startCodon){
 				$posicaoInicial = $i;
 				array_push($sequenciaCodificada, $codon);
-				for ($j=$i +3; $j < $tam; $j+=3) { 
+				for ($j=$i+3; $j <=$tam; $j+=3) { 
 					$codon = $codons[$j].$codons[$j+1].$codons[$j+2];
 					if(in_array($codon, $stopCodon)){
 						array_push($sequenciaCodificada, $codon);
