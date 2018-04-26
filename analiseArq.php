@@ -35,21 +35,6 @@ function eliminarLinha($posicaoInicial, $posicaoFinal, $fita){
 	escreverArquivo($posicaoInicial, $posicaoFinal, $fita);
 }
 
-/*function separandoSeq($posIni, $posFim){	
-	
-	if($fita == 'negativa'){
-		$newFile = file_get_contents('newCode.txt')or die("Error");
-		$arqvInvert = strrev($newFile);
-
-		$arquivoInvertido = file_put_contents('arquivoInvertido.txt', $arqvInvert);
-		$fileAberto = fopen('arquivoInvertido.txt', 'r');
-		escreverArquivo($posIni, $posFim, $fileAberto);
-	} else {
-		$newFile = fopen('newCode.txt', 'r') or die("Error");
-		escreverArquivo($posIni, $posFim, $newFile);
-	}		
-}	*/
-
 function escreverArquivo($posIni, $posFim, $fita){
 
 	$aux = 0;
@@ -114,34 +99,13 @@ function gerarComplementar($fita){
 		}
 	}else{
 		encontrarAminoacido($fita);
-		/*$newFile = file('seqNova.txt') or die("Error");
-		foreach ($newFile as $value_1) {
-			$stringArray = str_split($value_1);
-			foreach ($stringArray as $key => $value) {
-				if($stringArray[$key] == 'T'){
-					$trocandoT = str_replace('T', 'A', $stringArray[$key]);
-					$escreve = fwrite($novo, $trocandoT);
-
-				} elseif ($stringArray[$key] == 'A') {
-					$trocandoA = str_replace('A', 'T', $stringArray[$key]);
-					$escreve = fwrite($novo, $trocandoA);
-
-				} elseif ($stringArray[$key] == 'C') {
-					$trocandoC = str_replace('C', 'G', $stringArray[$key]);
-					$escreve = fwrite($novo, $trocandoC);
-
-				} elseif ($stringArray[$key] == 'G') {
-					$trocandoG = str_replace('G', 'C', $stringArray[$key]);
-					$escreve = fwrite($novo, $trocandoG);
-				}
-			}
-		}*/
 	}
+
 	fclose($novo);
 	encontrarAminoacido($fita);
 }
 
-function dicionarioAminoacidos($sequencia, $posicao){
+function dicionarioAminoacidos($sequencia, $posicao, $fita){
 
 	$aminoacidos = [];
 	$aminoacidos['TTT'] = 'F';//Fenilanina
@@ -209,9 +173,19 @@ function dicionarioAminoacidos($sequencia, $posicao){
 	$aminoacidos['GGA'] = 'G'; //glicina
 	$aminoacidos['GGG'] = 'G';//glicina
 
-	$frame = $posicao - 3 * ($posicao-1 % 3);
-	echo "Frame => ". $frame;
-	echo "</br>";
+
+	$restoDiv = floor($posicao-1)/3;
+	$frame = $posicao -  (3 * ($restoDiv));
+	
+	if ($fita == 'negativa'){
+		$frame = $frame*(-1);
+		echo "Frame => ". $frame;
+		echo "</br>";
+	} else{
+		echo "Frame => ". $frame;
+		echo "</br>";
+	}
+	
 
 	foreach ($sequencia as $key => $value) {
 		echo "Códon =>" . $value . ' - ' ;
@@ -243,7 +217,7 @@ function encontrarAminoacido($fita){
 						$codon = $codons[$j].$codons[$j+1].$codons[$j+2];
 						if(in_array($codon, $stopCodon)){
 							array_push($sequenciaCodificada, $codon);
-							dicionarioAminoacidos($sequenciaCodificada, $posicaoInicial);
+							dicionarioAminoacidos($sequenciaCodificada, $posicaoInicial, $fita);
 							exit();
 						} else{
 							array_push($sequenciaCodificada, $codon);
@@ -267,7 +241,7 @@ function encontrarAminoacido($fita){
 						$codon = $codons[$j].$codons[$j+1].$codons[$j+2];
 						if(in_array($codon, $stopCodon)){
 							array_push($sequenciaCodificada, $codon);
-							dicionarioAminoacidos($sequenciaCodificada, $posicaoInicial);
+							dicionarioAminoacidos($sequenciaCodificada, $posicaoInicial, $fita);
 							exit();
 						} else{
 							array_push($sequenciaCodificada, $codon);
