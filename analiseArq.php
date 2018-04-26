@@ -4,22 +4,27 @@
 
 set_time_limit(0);
 
-if (!empty($_POST)) {
+if($_SERVER["REQUEST_METHOD"] == "POST"){ 
 
-	if(isset($_POST['fita']) && isset($_POST['posicaoInicial']) && isset($_POST["posicaoFinal"])){
-	    $fita = $_POST["fita"];
-		$posicaoInicial = $_POST["posicaoInicial"];
-		$posicaoFinal = $_POST["posicaoFinal"];
+	if (!empty($_POST)) {
 
-	    eliminarLinha($posicaoInicial, $posicaoFinal, $fita);
+		if(isset($_POST['fita']) && isset($_POST['posicaoInicial']) && isset($_POST["posicaoFinal"])){
+		    $fita = $_POST["fita"];
+			$posicaoInicial = $_POST["posicaoInicial"];
+			$posicaoFinal = $_POST["posicaoFinal"];
 
-	} else{
-		echo "<div class='alert alert-danger' role='alert'>
-	  			Valores indefinidos
-			</div>";
+		    eliminarLinha($posicaoInicial, $posicaoFinal, $fita);
+
+		} else{
+			echo "<div class='alert alert-danger' role='alert'>
+		  			Valores indefinidos
+				</div>";
+		}
+	}else{
+		echo "Não houve submit no formulário";
 	}
-}else{
-	echo "Não houve submit no formulário";
+} else{
+	encontrarPromotor();
 }
 
 function eliminarLinha($posicaoInicial, $posicaoFinal, $fita){
@@ -251,6 +256,24 @@ function encontrarAminoacido($fita){
 			}
 		}
 	}	
+}
+
+function encontrarPromotor(){
+	$sequenciaNegativa = file('complementar.txt') or die('Erro ao abrir o arquivo');
+	$basePromotora = ['TATATT', 'TTGACA'];
+	foreach ($sequenciaNegativa as $value) {
+		$base = str_split($value);
+		$tamBase = sizeof($base);
+
+		for ($i=0; $i < 458; $i++) {
+			$promotor = $base[$i].$base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$i+5]; 
+			if(in_array($promotor, $basePromotora)){
+				echo "encontrei o promotor";
+				print_r($promotor);
+				exit();
+			}
+		}
+	}
 }
 
 ?>

@@ -14,7 +14,7 @@
 	<nav class="navbar navbar-default">
 		<div class="container-fluid">
 		    <ul class="nav navbar-nav">
-		    	<div class="navbar-header">
+			    <div class="navbar-header">
 			    	<a class="navbar-brand" href="viewAnalaise.php">Home</a>
 			    </div>
 		      	<li><a href="analisarSeq.php">Analisar Sequência</a></li>
@@ -22,9 +22,14 @@
 		    </ul>
 		 </div>
 	</nav>
-  	<center><h2>Análise Sequência Genética</h2>
-  	<p>Este trabalho foi desenvolvido pelas alunas Stephanie Lima e Ana Cecília para compor a nota da disciplina de Bioinformática lecionada pelo professor Diego Frias.</p></center>
+	<center><h2>Região Promotora</h2>
+  	<p> A região promotora está localizada geralmente na região 5' de um gene. O promotor contém sequência de DNA específicas que são reconhecidas por proteínas conhecidas como fatores de transcrição. Estes fatores se ligam às sequências dp promotor, recrutando a DNA Polimerase para realizar a transcrição.</p></center>
   	<hr/>
+	<form method="get" action="analiseArq.php">
+	    <div class="form-group col-md-12">
+			<button type="submit" class="btn btn-primary">Encontrar Promotor</button>
+	    </div>
+	</form>
 </div>
 </body>
 </html>
