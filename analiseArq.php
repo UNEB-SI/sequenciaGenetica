@@ -113,7 +113,8 @@ function gerarComplementar($fita){
 			}
 		}
 	}else{
-		$newFile = file('seqNova.txt') or die("Error");
+		encontrarAminoacido($fita);
+		/*$newFile = file('seqNova.txt') or die("Error");
 		foreach ($newFile as $value_1) {
 			$stringArray = str_split($value_1);
 			foreach ($stringArray as $key => $value) {
@@ -134,11 +135,10 @@ function gerarComplementar($fita){
 					$escreve = fwrite($novo, $trocandoG);
 				}
 			}
-		}
+		}*/
 	}
-
 	fclose($novo);
-	encontrarAminoacido();
+	encontrarAminoacido($fita);
 }
 
 function dicionarioAminoacidos($sequencia, $posicao){
@@ -209,7 +209,7 @@ function dicionarioAminoacidos($sequencia, $posicao){
 	$aminoacidos['GGA'] = 'G'; //glicina
 	$aminoacidos['GGG'] = 'G';//glicina
 
-	$frame = $posicao - 3 * floor($posicao-1/3);
+	$frame = $posicao - 3 * ($posicao-1 % 3);
 	echo "Frame => ". $frame;
 	echo "</br>";
 
@@ -221,36 +221,62 @@ function dicionarioAminoacidos($sequencia, $posicao){
 	}
 }
 
-function encontrarAminoacido(){
+function encontrarAminoacido($fita){
 	
-	$complementar = file('complementar.txt') or die('Error');
 	$sequenciaCodificada = array();
 	$stopCodon = ['TAA', 'TAG','TGA'];
 	$startCodon = 'ATG';
 	$posicaoInicial = 0;
 
-	foreach ($complementar as $value) {
-		$codons = str_split($value);
-		$tam = sizeof($codons);
+	if($fita == 'negativa'){
+		$complementar = file('complementar.txt') or die('Error ao abrir complementar');
+		foreach ($complementar as $value) {
+			$codons = str_split($value);
+			$tam = sizeof($codons);
 
-		for ($i=0; $i <= $tam; $i++) { 
-			$codon = $codons[$i].$codons[$i+1].$codons[$i+2];
-			if ($codon == $startCodon){
-				$posicaoInicial = $i;
-				array_push($sequenciaCodificada, $codon);
-				for ($j=$i+3; $j <=$tam; $j+=3) { 
-					$codon = $codons[$j].$codons[$j+1].$codons[$j+2];
-					if(in_array($codon, $stopCodon)){
-						array_push($sequenciaCodificada, $codon);
-						dicionarioAminoacidos($sequenciaCodificada, $posicaoInicial);
-						exit();
-					} else{
-						array_push($sequenciaCodificada, $codon);
+			for ($i=0; $i <= $tam; $i++) { 
+				$codon = $codons[$i].$codons[$i+1].$codons[$i+2];
+				if ($codon == $startCodon){
+					$posicaoInicial = $i;
+					array_push($sequenciaCodificada, $codon);
+					for ($j=$i+3; $j <=$tam; $j+=3) { 
+						$codon = $codons[$j].$codons[$j+1].$codons[$j+2];
+						if(in_array($codon, $stopCodon)){
+							array_push($sequenciaCodificada, $codon);
+							dicionarioAminoacidos($sequenciaCodificada, $posicaoInicial);
+							exit();
+						} else{
+							array_push($sequenciaCodificada, $codon);
+						}
 					}
 				}
 			}
 		}
-	}
+	} else{
+		$fitaPositiva = file('seqNova.txt') or die('Error ao abrir fita positiva');
+		foreach ($fitaPositiva as $value) {
+			$codons = str_split($value);
+			$tam = sizeof($codons);
+
+			for ($i=0; $i <= $tam; $i++) { 
+				$codon = $codons[$i].$codons[$i+1].$codons[$i+2];
+				if ($codon == $startCodon){
+					$posicaoInicial = $i;
+					array_push($sequenciaCodificada, $codon);
+					for ($j=$i+3; $j <=$tam; $j+=3) { 
+						$codon = $codons[$j].$codons[$j+1].$codons[$j+2];
+						if(in_array($codon, $stopCodon)){
+							array_push($sequenciaCodificada, $codon);
+							dicionarioAminoacidos($sequenciaCodificada, $posicaoInicial);
+							exit();
+						} else{
+							array_push($sequenciaCodificada, $codon);
+						}
+					}
+				}
+			}
+		}
+	}	
 }
 
 ?>
