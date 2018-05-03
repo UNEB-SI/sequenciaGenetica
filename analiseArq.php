@@ -4,30 +4,27 @@
 
 set_time_limit(0);
 
-if($_SERVER["REQUEST_METHOD"] == "POST"){ 
-
-	if (!empty($_POST)) {
-
-		if(isset($_POST['fita']) && isset($_POST['posicaoInicial']) && isset($_POST["posicaoFinal"])){
+if (!empty($_POST)) {
+	if(isset($_POST['fita']) && isset($_POST['posicaoInicial']) && isset($_POST["posicaoFinal"])){
 		    $fita = $_POST["fita"];
 			$posicaoInicial = $_POST["posicaoInicial"];
 			$posicaoFinal = $_POST["posicaoFinal"];
-
-		    eliminarLinha($posicaoInicial, $posicaoFinal, $fita);
-
+		if(isset($_POST['analisarSequencia'])){ 
+			$submit = $_POST['analisarSequencia'];
+		    eliminarLinha($posicaoInicial, $posicaoFinal, $fita, $submit);
 		} else{
-			echo "<div class='alert alert-danger' role='alert'>
-		  			Valores indefinidos
-				</div>";
-		}
-	}else{
-		echo "Não houve submit no formulário";
-	}
-} else{
-	encontrarPromotor();
+			$submit = $_POST['encontrarPromotor'];
+			eliminarLinha($posicaoInicial, $posicaoFinal, $fita, $submit);		}	
+	} else{
+		echo "<div class='alert alert-danger' role='alert'>
+			Valores indefinidos
+		</div>";
+	}	
+}else{
+	echo "Não houve submit no formulário";
 }
-
-function eliminarLinha($posicaoInicial, $posicaoFinal, $fita){
+	
+function eliminarLinha($posicaoInicial, $posicaoFinal, $fita, $submit){
 	$arquivo = file("Bioinfo_TestSequence_Complete_Genome_FASTA.txt") or die("Error");
 	unset($arquivo[0]);
 	$novo = 'newCode.txt';
@@ -37,10 +34,17 @@ function eliminarLinha($posicaoInicial, $posicaoFinal, $fita){
 		$string = trim(preg_replace('/\s+/', ' ', $value));
 		$writeArq = fwrite($file, $string);		
 	}
-	escreverArquivo($posicaoInicial, $posicaoFinal, $fita);
+
+	if($submit == 'analisarSequencia'){
+		escreverArquivo($posicaoInicial, $posicaoFinal, $fita, $submit);
+	} else{
+		$novaPosicaoInicial = $posicaoInicial - 30; //para encontrar região promotora
+		$novaPosicaoFinal = $posicaoFinal + 30; //para encontrar terminador
+		escreverArquivo($novaPosicaoInicial, $novaPosicaoFinal, $fita, $submit);
+	}
 }
 
-function escreverArquivo($posIni, $posFim, $fita){
+function escreverArquivo($posIni, $posFim, $fita, $submit){
 
 	$aux = 0;
 	$count = $posIni;
@@ -66,48 +70,50 @@ function escreverArquivo($posIni, $posFim, $fita){
 	}
 
 	fclose($file);
-	gerarComplementar($fita);
+
+	if($fita == 'negativa'){
+		gerarComplementar($posIni, $posFim, $fita, $submit);
+	} else{
+		encontrarAminoacido($posIni, $posFim, $fita, $submit);
+	}
+
 }
 
-function gerarComplementar($fita){
+function gerarComplementar($posIni, $posFim, $fita, $submit){
 
 	$complementar = 'complementar.txt';
 	$novo = fopen($complementar, 'a');
 
-	if($fita == 'negativa'){
-		$arquivo = file_get_contents('seqNova.txt')or die("Error");
-		$arqvInvert = strrev($arquivo);
+	$arquivo = file_get_contents('seqNova.txt')or die("Error");
+	$arqvInvert = strrev($arquivo);
 
-		$arquivoInvertido = file_put_contents('arquivoInvertido.txt', $arqvInvert);
-		$fileAberto = file('arquivoInvertido.txt');
+	$arquivoInvertido = file_put_contents('arquivoInvertido.txt', $arqvInvert);
+	$fileAberto = file('arquivoInvertido.txt');
 
-		foreach ($fileAberto as $arquivoArbeto) {
-			$stringArray = str_split($arquivoArbeto);
-			foreach ($stringArray as $key => $value) {
-				if($stringArray[$key] == 'T'){
-					$trocandoT = str_replace('T', 'A', $stringArray[$key]);
-					$escreve = fwrite($novo, $trocandoT);
+	foreach ($fileAberto as $arquivoArbeto) {
+		$stringArray = str_split($arquivoArbeto);
+		foreach ($stringArray as $key => $value) {
+			if($stringArray[$key] == 'T'){
+				$trocandoT = str_replace('T', 'A', $stringArray[$key]);
+				$escreve = fwrite($novo, $trocandoT);
 
-				} elseif ($stringArray[$key] == 'A') {
-					$trocandoA = str_replace('A', 'T', $stringArray[$key]);
-					$escreve = fwrite($novo, $trocandoA);
+			} elseif ($stringArray[$key] == 'A') {
+				$trocandoA = str_replace('A', 'T', $stringArray[$key]);
+				$escreve = fwrite($novo, $trocandoA);
 
-				} elseif ($stringArray[$key] == 'C') {
-					$trocandoC = str_replace('C', 'G', $stringArray[$key]);
-					$escreve = fwrite($novo, $trocandoC);
+			} elseif ($stringArray[$key] == 'C') {
+				$trocandoC = str_replace('C', 'G', $stringArray[$key]);
+				$escreve = fwrite($novo, $trocandoC);
 
-				} elseif ($stringArray[$key] == 'G') {
-					$trocandoG = str_replace('G', 'C', $stringArray[$key]);
-					$escreve = fwrite($novo, $trocandoG);
-				}
+			} elseif ($stringArray[$key] == 'G') {
+				$trocandoG = str_replace('G', 'C', $stringArray[$key]);
+				$escreve = fwrite($novo, $trocandoG);
 			}
 		}
-	}else{
-		encontrarAminoacido($fita);
 	}
 
 	fclose($novo);
-	encontrarAminoacido($fita);
+	encontrarAminoacido($posIni, $posFim, $fita, $submit);
 }
 
 function dicionarioAminoacidos($sequencia, $posicao, $fita){
@@ -200,67 +206,75 @@ function dicionarioAminoacidos($sequencia, $posicao, $fita){
 	}
 }
 
-function encontrarAminoacido($fita){
+function encontrarAminoacido($posIni, $posFim, $fita, $submit){
 	
 	$sequenciaCodificada = array();
 	$stopCodon = ['TAA', 'TAG','TGA'];
 	$startCodon = 'ATG';
 	$posicaoInicial = 0;
 
-	if($fita == 'negativa'){
-		$complementar = file('complementar.txt') or die('Error ao abrir complementar');
-		foreach ($complementar as $value) {
-			$codons = str_split($value);
-			$tam = sizeof($codons);
+	if($submit == 'analisarSequencia'){
+		if($fita == 'negativa'){
+			$complementar = file('complementar.txt') or die('Error ao abrir complementar');
+			foreach ($complementar as $value) {
+				$codons = str_split($value);
+				$tam = sizeof($codons);
 
-			for ($i=0; $i <= $tam; $i++) { 
-				$codon = $codons[$i].$codons[$i+1].$codons[$i+2];
-				if ($codon == $startCodon){
-					$posicaoInicial = $i;
-					array_push($sequenciaCodificada, $codon);
-					for ($j=$i+3; $j <=$tam; $j+=3) { 
-						$codon = $codons[$j].$codons[$j+1].$codons[$j+2];
-						if(in_array($codon, $stopCodon)){
-							array_push($sequenciaCodificada, $codon);
-							dicionarioAminoacidos($sequenciaCodificada, $posicaoInicial, $fita);
-							exit();
-						} else{
-							array_push($sequenciaCodificada, $codon);
+				for ($i=0; $i <= $tam; $i++) { 
+					$codon = $codons[$i].$codons[$i+1].$codons[$i+2];
+					if ($codon == $startCodon){
+						$posicaoInicial = $i;
+						array_push($sequenciaCodificada, $codon);
+						for ($j=$i+3; $j <=$tam; $j+=3) { 
+							$codon = $codons[$j].$codons[$j+1].$codons[$j+2];
+							if(in_array($codon, $stopCodon)){
+								array_push($sequenciaCodificada, $codon);
+								dicionarioAminoacidos($sequenciaCodificada, $posicaoInicial, $fita);
+								exit();
+							} else{
+								array_push($sequenciaCodificada, $codon);
+							}
 						}
 					}
 				}
 			}
-		}
-	} else{
-		$fitaPositiva = file('seqNova.txt') or die('Error ao abrir fita positiva');
-		foreach ($fitaPositiva as $value) {
-			$codons = str_split($value);
-			$tam = sizeof($codons);
+		} else{
+			$fitaPositiva = file('seqNova.txt') or die('Error ao abrir fita positiva');
+			foreach ($fitaPositiva as $value) {
+				$codons = str_split($value);
+				$tam = sizeof($codons);
 
-			for ($i=0; $i <= $tam; $i++) { 
-				$codon = $codons[$i].$codons[$i+1].$codons[$i+2];
-				if ($codon == $startCodon){
-					$posicaoInicial = $i;
-					array_push($sequenciaCodificada, $codon);
-					for ($j=$i+3; $j <=$tam; $j+=3) { 
-						$codon = $codons[$j].$codons[$j+1].$codons[$j+2];
-						if(in_array($codon, $stopCodon)){
-							array_push($sequenciaCodificada, $codon);
-							dicionarioAminoacidos($sequenciaCodificada, $posicaoInicial, $fita);
-							exit();
-						} else{
-							array_push($sequenciaCodificada, $codon);
+				for ($i=0; $i <= $tam; $i++) { 
+					$codon = $codons[$i].$codons[$i+1].$codons[$i+2];
+					if ($codon == $startCodon){
+						$posicaoInicial = $i;
+						array_push($sequenciaCodificada, $codon);
+						for ($j=$i+3; $j <=$tam; $j+=3) { 
+							$codon = $codons[$j].$codons[$j+1].$codons[$j+2];
+							if(in_array($codon, $stopCodon)){
+								array_push($sequenciaCodificada, $codon);
+								dicionarioAminoacidos($sequenciaCodificada, $posicaoInicial, $fita);
+								exit();
+							} else{
+								array_push($sequenciaCodificada, $codon);
+							}
 						}
 					}
 				}
 			}
-		}
+		}	
+	}else{
+		encontrarPromotor($posIni, $posFim, $fita, $submit);
 	}	
 }
 
-function encontrarPromotor(){
-	$sequenciaNegativa = file('complementar.txt') or die('Erro ao abrir o arquivo');
+function encontrarPromotor($posIni, $posFim, $fita){
+	echo "entrei na regiao do promotor "."<\br>";
+	echo $posIni;
+	exit();
+
 	$basePromotora = ['TATATT', 'TTGACA'];
+
 	foreach ($sequenciaNegativa as $value) {
 		$base = str_split($value);
 		$tamBase = sizeof($base);
