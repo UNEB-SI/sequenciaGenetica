@@ -38,8 +38,8 @@ function eliminarLinha($posicaoInicial, $posicaoFinal, $fita, $submit){
 	if($submit == 'analisarSequencia'){
 		escreverArquivo($posicaoInicial, $posicaoFinal, $fita, $submit);
 	} else{
-		$novaPosicaoInicial = $posicaoInicial - 30; //para encontrar região promotora
-		$novaPosicaoFinal = $posicaoFinal + 30; //para encontrar terminador
+		$novaPosicaoInicial = $posicaoInicial - 35; //para encontrar região promotora
+		$novaPosicaoFinal = $posicaoFinal + 35; //para encontrar terminador
 		escreverArquivo($novaPosicaoInicial, $novaPosicaoFinal, $fita, $submit);
 	}
 }
@@ -269,25 +269,42 @@ function encontrarAminoacido($posIni, $posFim, $fita, $submit){
 }
 
 function encontrarPromotor($posIni, $posFim, $fita){
-	echo "entrei na regiao do promotor "."<\br>";
-	echo $posIni;
-	exit();
 
-	$basePromotora = ['TATATT', 'TTGACA'];
+	$tataBox = ['TATAAT'];
 
-	foreach ($sequenciaNegativa as $value) {
-		$base = str_split($value);
-		$tamBase = sizeof($base);
+	if($fita == 'negativa'){
+		$sequenciaNegativa = file('complementar.txt') or die("Erro ao abrir complementar");
+		foreach ($sequenciaNegativa as $value) {
+			$base = str_split($value);
+			$tamBase = sizeof($base);
 
-		for ($i=0; $i < 458; $i++) {
-			$promotor = $base[$i].$base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$i+5]; 
-			if(in_array($promotor, $basePromotora)){
-				echo "encontrei o promotor";
-				print_r($promotor);
-				exit();
+			for ($i=0; $i < $tamBase; $i++) {
+				$promotor = $base[$i].$base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$i+5]; 
+				if(in_array($promotor, $tataBox)){
+					echo "encontrei o promotor";
+					print_r($promotor);
+					exit();
+				}
+			}
+		}
+	}else{
+		$sequenciaPositiva = file('seqNova.txt') or die("Erro ao abrir sequencia nova");
+		foreach ($sequenciaPositiva as $value) {
+			$base = str_split($value);
+			$tamBase = sizeof($base);
+
+			for ($i=0; $i < $tamBase; $i++) {
+				$promotor = $base[$i].$base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$i+5]; 
+				if(in_array($promotor, $tataBox)){
+					echo "encontrei o promotor";
+					print_r($promotor);
+					exit();
+				}
 			}
 		}
 	}
 }
 
+//ECORI G (corte) AATTC
+//		CTTAA (corte) G
 ?>
