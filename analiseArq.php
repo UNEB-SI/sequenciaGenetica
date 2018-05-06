@@ -12,9 +12,15 @@ if (!empty($_POST)) {
 		if(isset($_POST['analisarSequencia'])){ 
 			$submit = $_POST['analisarSequencia'];
 		    eliminarLinha($posicaoInicial, $posicaoFinal, $fita, $submit);
-		} else{
+		} else if (isset($_POST['encontrarPromotor'])){
 			$submit = $_POST['encontrarPromotor'];
-			eliminarLinha($posicaoInicial, $posicaoFinal, $fita, $submit);		}	
+			eliminarLinha($posicaoInicial, $posicaoFinal, $fita, $submit);		
+		} else if(isset($_POST['realizarRestricao'])){
+			$submit = $_POST['realizarRestricao'];
+			eliminarLinha($posicaoInicial, $posicaoFinal, $fita, $submit);	
+		} else{
+			echo "Não houve submit no formulário";
+		}	
 	} else{
 		echo "<div class='alert alert-danger' role='alert'>
 			Valores indefinidos
@@ -35,14 +41,24 @@ function eliminarLinha($posicaoInicial, $posicaoFinal, $fita, $submit){
 		$writeArq = fwrite($file, $string);		
 	}
 
-	if($submit == 'analisarSequencia'){
+	if($submit == 'Analisar Sequência'){
 		escreverArquivo($posicaoInicial, $posicaoFinal, $fita, $submit);
-	} else{
+	} else if($submit == 'Encontrar Promotor'){
 		$novaPosicaoInicial = $posicaoInicial - 35; //para encontrar região promotora
 		$novaPosicaoFinal = $posicaoFinal + 35; //para encontrar terminador
 		escreverArquivo($novaPosicaoInicial, $novaPosicaoFinal, $fita, $submit);
-	}
+	} else if($submit == 'Realizar Restrição'){
+		if($fita == 'negativa'){
+			gerarComplementar($posicaoInicial, $posicaoFinal, $fita, $submit);
+		} else{
+			realizarRestricao($posicaoInicial, $posicaoFinal, $fita, $submit);
+		}
+	} else{
+		echo "Error! Nenhum botão foi clicado";
+	}	
 }
+
+
 
 function escreverArquivo($posIni, $posFim, $fita, $submit){
 
@@ -70,13 +86,7 @@ function escreverArquivo($posIni, $posFim, $fita, $submit){
 	}
 
 	fclose($file);
-
-	if($fita == 'negativa'){
-		gerarComplementar($posIni, $posFim, $fita, $submit);
-	} else{
-		encontrarAminoacido($posIni, $posFim, $fita, $submit);
-	}
-
+	encontrarAminoacido($posIni, $posFim, $fita, $submit);
 }
 
 function gerarComplementar($posIni, $posFim, $fita, $submit){
@@ -84,11 +94,17 @@ function gerarComplementar($posIni, $posFim, $fita, $submit){
 	$complementar = 'complementar.txt';
 	$novo = fopen($complementar, 'a');
 
-	$arquivo = file_get_contents('seqNova.txt')or die("Error");
-	$arqvInvert = strrev($arquivo);
-
-	$arquivoInvertido = file_put_contents('arquivoInvertido.txt', $arqvInvert);
-	$fileAberto = file('arquivoInvertido.txt');
+	if($submit == 'Analisar Sequência'){
+		$arquivo = file_get_contents('seqNova.txt')or die("Error");
+		$arqvInvert = strrev($arquivo);
+		$arquivoInvertido = file_put_contents('arquivoInvertido.txt', $arqvInvert);
+		$fileAberto = file('arquivoInvertido.txt');
+	} else{
+		$arquivo = file_get_contents('newCode.txt')or die("Error");
+		$arqvInvert = strrev($arquivo);
+		$arquivoInvertido = file_put_contents('arquivoInvertido.txt', $arqvInvert);
+		$fileAberto = file('arquivoInvertido.txt');
+	}
 
 	foreach ($fileAberto as $arquivoArbeto) {
 		$stringArray = str_split($arquivoArbeto);
@@ -113,7 +129,11 @@ function gerarComplementar($posIni, $posFim, $fita, $submit){
 	}
 
 	fclose($novo);
-	encontrarAminoacido($posIni, $posFim, $fita, $submit);
+	if($submit == 'Analisar Sequência'){
+		encontrarAminoacido($posIni, $posFim, $fita, $submit);
+	} else{
+		realizarRestricao($posIni, $posFim, $fita, $submit);
+	}	
 }
 
 function dicionarioAminoacidos($sequencia, $posicao, $fita){
@@ -305,6 +325,48 @@ function encontrarPromotor($posIni, $posFim, $fita){
 	}
 }
 
+function realizarRestricao($posicaoInicial, $posicaoFinal, $fita, $submit){
+	$ecoriPos = ['GAATTC']; //o corte deverá ser assim G AATTC
+	$ecoriNeg = ['CTTAAG']; //o corte deverá ser assim CTTAA G
+	$fragmentos_1 = [];
+	$fragmentos_2= [];
+
+	if($fita == 'negativa'){
+		$fileAberto = file('complementar.txt') or die("Erro ao abrir complementar");
+		
+		foreach ($fileAberto as $value) {
+			$base = str_split($value);
+			$tamBase = 4744671;
+
+			for ($i=0; $i < $tamBase; $i++) {
+				$fragmento = $base[$i].$base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$i+5]; 
+				if(in_array($fragmento, $ecoriNeg)){
+					$novoFrag = explode("G",$fragmento);
+					print_r($novoFrag);
+					exit();
+					
+				} else{
+					array_push($fragmentos_1, $fragmento);
+				}
+			}
+		}
+	} else{
+		$arquivo = file('newCode.txt') or die("Error ao abrir arquivo para realizarRestricao");
+		foreach ($arquivo as $value) {
+			$base = str_split($value);
+			$tamBase = sizeof($base);
+
+			for ($i=0; $i < $tamBase; $i++) {
+				$fragmento = $base[$i].$base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$i+5]; 
+				if(in_array($fragmento, $ecoriPos)){
+					array_push($fragmentos, $fragmento);
+					print_r($fragmento);
+					exit();
+				}
+			}
+		}
+	}
+}
 //ECORI G (corte) AATTC
 //		CTTAA (corte) G
 ?>

@@ -33,6 +33,7 @@
 	    <div class="form-group col-md-12">
 			<input type="submit" id="analisarSequencia" name="analisarSequencia" value="Analisar Sequência" class="btn btn-primary">
 			<input type="submit" id="encontrarPromotor" name="encontrarPromotor" value="Encontrar Promotor" class="btn btn-primary">
+			<input type="submit" id="realizarRestricao" name="realizarRestricao" value="Realizar Restrição" class="btn btn-primary">
 	    </div>
 	</form>
 </div>
