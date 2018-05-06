@@ -2,6 +2,7 @@
 //gtt antepenultimo
 // taa ultimo
 
+ini_set('memory_limit', '-1');
 set_time_limit(0);
 
 if (!empty($_POST)) {
@@ -328,28 +329,33 @@ function encontrarPromotor($posIni, $posFim, $fita){
 function realizarRestricao($posicaoInicial, $posicaoFinal, $fita, $submit){
 	$ecoriPos = ['GAATTC']; //o corte deverá ser assim G AATTC
 	$ecoriNeg = ['CTTAAG']; //o corte deverá ser assim CTTAA G
-	$fragmentos_1 = [];
-	$fragmentos_2= [];
+	$fragmentos = [];
+	$fragConcat= "";
 
 	if($fita == 'negativa'){
 		$fileAberto = file('complementar.txt') or die("Erro ao abrir complementar");
 		
 		foreach ($fileAberto as $value) {
 			$base = str_split($value);
-			$tamBase = 4744671;
+			$tamBase = sizeof($base);
 
 			for ($i=0; $i < $tamBase; $i++) {
 				$fragmento = $base[$i].$base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$i+5]; 
 				if(in_array($fragmento, $ecoriNeg)){
-					$novoFrag = explode("G",$fragmento);
-					print_r($novoFrag);
-					exit();
-					
+					$novoFragArray = explode("G",$fragmento);
+					$novoFrag = implode("", $novoFragArray);
+					$fragConcat = $fragConcat . $novoFrag;
+					array_push($fragmentos, $fragConcat);	
+					print_r($fragmentos);
+					exit();			
 				} else{
-					array_push($fragmentos_1, $fragmento);
+					$fragConcat = $fragConcat . $base[$i];
+					//array_push($fragmentos, $fragmento);
 				}
 			}
 		}
+		print_r($fragmentos);
+		exit();
 	} else{
 		$arquivo = file('newCode.txt') or die("Error ao abrir arquivo para realizarRestricao");
 		foreach ($arquivo as $value) {
