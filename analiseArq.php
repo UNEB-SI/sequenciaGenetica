@@ -421,15 +421,17 @@ function realizarRestricao($posicaoInicial, $posicaoFinal, $fita, $submit){
 				if(in_array($fragmento, $ecoriPos)){
 					$posicaoF = $i;
 					//echo $i . "</br>";
-					array_push($fragmentos,fazerClivagem($fragmento,$fita,$fragConcat)); 
+					$frag = fazerClivagem($fragmento, $fragConcat);					
+					$frags = array('inicio' => $posicaoI, 'final' => $posicaoF, 'fragmento' => $frag);
+					array_push($fragmentos, $frags); 
+					$posicaoI = $posicaoF +1;
 					//$fragReturn = fazerClivagem($fragmento, $fragmentos, $fragConcat, $fita);
 					$fragNew = $base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$i+5].$base[$i+6];			
 					$fragConcat = "";		
 					$fragConcat = $fragConcat . $fragNew;
-					$posicoes = array('inicio' => $posicaoI, 'final' => $posicaoF);
-					$posicaoI = $posicaoF +1;
+					
 
-					array_push($fragIndices, $posicoes);
+					
 
 
 
@@ -455,7 +457,7 @@ function realizarRestricao($posicaoInicial, $posicaoFinal, $fita, $submit){
 				}
 			}
 
-			gerarTable($fragmentos, $fragIndices);
+			gerarTable($fragmentos);
 
 			
 				//print_r($fragReturn);
@@ -465,13 +467,14 @@ function realizarRestricao($posicaoInicial, $posicaoFinal, $fita, $submit){
 	//}
 }
 
-function fazerClivagem($fragmento,$fita,$inicioFragmento){
+function fazerClivagem($fragmento, $fragConcat){
 	$novoFragArray = explode("AATTC",$fragmento); //explode trasforma a string num array
-	return array($inicioFragmento . implode("",$novoFragArray));	
+	$novoArray = implode("",$novoFragArray);
+	$fragConcat = $fragConcat.$novoArray;
+	return 	$fragConcat;
 }
 
-function gerarTable($fragmentos, $posicoes){
-
+function gerarTable($fragmentos){
 	echo "<table class='table table-responsive'>";
 	echo "    <thead>";
 	echo "    	<tr>";
@@ -491,30 +494,21 @@ function gerarTable($fragmentos, $posicoes){
 	echo "    </thead>";
 	echo "    </tbody>";
 
-	foreach ($posicoes as $value) {
-		
-		print_r($value['inicio']);
-		print_r($value['final']);
-		exit();
-	}
-
 	foreach ($fragmentos as $key => $value) {
-		foreach ($value as $k => $valor) {
-			echo "<tr>";
-		    echo "   <td>";
-		    echo        $key;
-		    echo "   </td>";
-		    /*echo "   <td>";
-		    print_r  ($value[$k]);
-		    echo "   </td>";*/
-		    echo "   <td>";
-		    echo       $posicaoI;
-		    echo "   </td>";
-		    echo "   <td>";
-		    echo       $posicaoF;
-		    echo "   </td>";
-		    echo "</tr>";
-		}
+		echo "<tr>";
+	    echo "   <td>";
+		echo 		$key;
+	    echo "   </td>";
+	    /*echo "   <td>";
+	    print_r  ($value['fragmento']);
+	    echo "   </td>";*/
+	    echo "   <td>";
+	    print_r  ($value['inicio']);
+	    echo "   </td>";
+	    echo "   <td>";
+	    print_r  ($value['final']);
+	    echo "   </td>";
+	    echo "</tr>";
 	}
 	echo "	</tbody>";
 	echo "</table>";
