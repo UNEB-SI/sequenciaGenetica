@@ -1,3 +1,10 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
 <?php
 //gtt antepenultimo
 // taa ultimo
@@ -45,7 +52,7 @@ function eliminarLinha($posicaoInicial, $posicaoFinal, $fita, $submit){
 	if($submit == 'Analisar Sequência'){
 		escreverArquivo($posicaoInicial, $posicaoFinal, $fita, $submit);
 	} else if($submit == 'Encontrar Promotor'){
-		$novaPosicaoInicial = $posicaoInicial - 35; //para encontrar região promotora
+		$novaPosicaoInicial = $posicaoInicial - 35; //para encontrar região promotora W == valor variável
 		escreverArquivo($novaPosicaoInicial, $posicaoFinal, $fita, $submit);
 	} else if($submit == 'Realizar Restrição'){
 		if($fita == 'negativa'){
@@ -361,7 +368,7 @@ function encontrarPromotor($posIni, $posFim, $fita){
 				}
 				$i++;
 			}
-			print_r($conjuntoPromoter);
+			print_r($promotor);
 		}
 	}
 }
@@ -372,8 +379,10 @@ function realizarRestricao($posicaoInicial, $posicaoFinal, $fita, $submit){
 	$fragmentos = [];
 	$fragConcat= "";
 	$concatFrag="";
-
-	if($fita == 'negativa'){
+	$fragIndices = [];
+	$posicoes = [];
+	$posicaoI= 0;
+	/*if($fita == 'negativa'){
 		$fileAberto = file('complementar.txt') or die("Erro ao abrir complementar");
 		
 		foreach ($fileAberto as $value) {
@@ -401,7 +410,7 @@ function realizarRestricao($posicaoInicial, $posicaoFinal, $fita, $submit){
 			print_r($fragmentos);
 			exit();
 		}
-	} else{
+	} else{*/
 		$arquivo = file('newCode.txt') or die("Error ao abrir arquivo para realizarRestricao");
 		foreach ($arquivo as $value) {
 			$base = str_split($value);
@@ -410,42 +419,108 @@ function realizarRestricao($posicaoInicial, $posicaoFinal, $fita, $submit){
 			for ($i=0; $i < $tamBase-5; $i++) {
 				$fragmento = $base[$i].$base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$i+5];
 				if(in_array($fragmento, $ecoriPos)){
-					fazerClivagem($fragmento, $fragmentos, $fragConcat, $fita);
-					$fragNew = $base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$i+5].$base[$i+6];
+					$posicaoF = $i;
+					//echo $i . "</br>";
+					array_push($fragmentos,fazerClivagem($fragmento,$fita,$fragConcat)); 
+					//$fragReturn = fazerClivagem($fragmento, $fragmentos, $fragConcat, $fita);
+					$fragNew = $base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$i+5].$base[$i+6];			
+					$fragConcat = "";		
 					$fragConcat = $fragConcat . $fragNew;
-					for ($j=$i+1; $j < $tamBase-5; $j++) { 
+					$posicoes = array('inicio' => $posicaoI, 'final' => $posicaoF);
+					$posicaoI = $posicaoF +1;
+
+					array_push($fragIndices, $posicoes);
+
+
+
+
+					//print_r($posicoes);
+					
+
+					/*for ($j=$i+1; $j < $tamBase-5; $j++) { 
 						$fragNew = $base[$j].$base[$j+1].$base[$j+2].$base[$j+3].$base[$j+4].$base[$j+5]; 
 						if(in_array($fragNew, $ecoriPos)){
-							fazerClivagem($fragNew, $fragmentos, $concatFrag, $fita);
+							$fragReturn  = fazerClivagem($fragNew, $fragmentos, $concatFrag, $fita);
 							$fragNew = $base[$j+1].$base[$j+2].$base[$j+3].$base[$j+4].$base[$j+5].$base[$j+6];
+							$concatFrag = "";
 							$concatFrag = $concatFrag . $fragNew;
+							print_r($fragReturn);
+							exit();
 						} else{
 							$concatFrag = $concatFrag . $base[$j];
 						}
-					}
+					}*/
 				} else{
-					$fragConcat = $fragConcat . $base[$i];
+					$fragConcat = $fragConcat . $base[$i];			
 				}
 			}
+
+			gerarTable($fragmentos, $fragIndices);
+
 			
-				exit();
+				//print_r($fragReturn);
+					//exit();
+				
+		}
+	//}
+}
+
+function fazerClivagem($fragmento,$fita,$inicioFragmento){
+	$novoFragArray = explode("AATTC",$fragmento); //explode trasforma a string num array
+	return array($inicioFragmento . implode("",$novoFragArray));	
+}
+
+function gerarTable($fragmentos, $posicoes){
+
+	echo "<table class='table table-responsive'>";
+	echo "    <thead>";
+	echo "    	<tr>";
+	echo "        <td>";
+	echo "            Indice";
+	echo "        </td>";
+	/*echo "        <td>";
+	echo "            Fragmento";
+	echo "        </td>";*/
+	echo "        <td>";
+	echo "            Posicao Inicial";
+	echo "        </td>";
+	echo "        <td>";
+	echo "            Posicao Final";
+	echo "        </td>";
+	echo "    	</tr>";
+	echo "    </thead>";
+	echo "    </tbody>";
+
+	foreach ($posicoes as $value) {
+		
+		print_r($value['inicio']);
+		print_r($value['final']);
+		exit();
+	}
+
+	foreach ($fragmentos as $key => $value) {
+		foreach ($value as $k => $valor) {
+			echo "<tr>";
+		    echo "   <td>";
+		    echo        $key;
+		    echo "   </td>";
+		    /*echo "   <td>";
+		    print_r  ($value[$k]);
+		    echo "   </td>";*/
+		    echo "   <td>";
+		    echo       $posicaoI;
+		    echo "   </td>";
+		    echo "   <td>";
+		    echo       $posicaoF;
+		    echo "   </td>";
+		    echo "</tr>";
 		}
 	}
+	echo "	</tbody>";
+	echo "</table>";
 }
 
-
-function fazerClivagem($fragmento, $fragmentos, $fragConcat, $fita){
-	if($fita == 'negativa'){
-		$novoFragArray = explode("G",$fragmento); //explode trasforma a string num array	
-	} else{
-		$novoFragArray = explode("AATTC",$fragmento); //explode trasforma a string num array
-		var_dump($novoFragArray);
-	}	
-
-	$novoFrag = implode("", $novoFragArray); // tranforma o array numa string
-	$fragConcat = $fragConcat . $novoFrag;
-	array_push($fragmentos, $fragConcat);
-}
-//ECORI G (corte) AATTC
-//		CTTAA (corte) G
 ?>
+
+</head>
+</html>
