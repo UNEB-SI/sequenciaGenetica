@@ -87,7 +87,12 @@ function escreverArquivo($posIni, $posFim, $fita, $submit){
 	}
 
 	fclose($file);
-	encontrarAminoacido($posIni, $posFim, $fita, $submit);
+
+	if($fita == 'negativa'){
+		gerarComplementar($posIni, $posFim, $fita, $submit);
+	} else{
+		encontrarAminoacido($posIni, $posFim, $fita, $submit);
+	}	
 }
 
 function gerarComplementar($posIni, $posFim, $fita, $submit){
@@ -132,8 +137,10 @@ function gerarComplementar($posIni, $posFim, $fita, $submit){
 	fclose($novo);
 	if($submit == 'Analisar Sequência'){
 		encontrarAminoacido($posIni, $posFim, $fita, $submit);
-	} else{
+	} else if($submit == 'Realizar Restrição'){
 		realizarRestricao($posIni, $posFim, $fita, $submit);
+	} else{
+		encontrarPromotor($posIni, $posFim, $fita);
 	}	
 }
 
@@ -234,64 +241,66 @@ function encontrarAminoacido($posIni, $posFim, $fita, $submit){
 	$startCodon = 'ATG';
 	$posicaoInicial = 0;
 
-	if($submit == 'analisarSequencia'){
-		if($fita == 'negativa'){
-			$complementar = file('complementar.txt') or die('Error ao abrir complementar');
-			foreach ($complementar as $value) {
-				$codons = str_split($value);
-				$tam = sizeof($codons);
+	if($fita == 'negativa'){
+		$complementar = file('complementar.txt') or die('Error ao abrir complementar');
+		foreach ($complementar as $value) {
+			$codons = str_split($value);
+			$tam = sizeof($codons);
 
-				for ($i=0; $i <= $tam; $i++) { 
-					$codon = $codons[$i].$codons[$i+1].$codons[$i+2];
-					if ($codon == $startCodon){
-						$posicaoInicial = $i;
-						array_push($sequenciaCodificada, $codon);
-						for ($j=$i+3; $j <=$tam; $j+=3) { 
-							$codon = $codons[$j].$codons[$j+1].$codons[$j+2];
-							if(in_array($codon, $stopCodon)){
-								array_push($sequenciaCodificada, $codon);
-								dicionarioAminoacidos($sequenciaCodificada, $posicaoInicial, $fita);
-								exit();
-							} else{
-								array_push($sequenciaCodificada, $codon);
-							}
+			for ($i=0; $i <= $tam; $i++) { 
+				$codon = $codons[$i].$codons[$i+1].$codons[$i+2];
+				if ($codon == $startCodon){
+					$posicaoInicial = $i;
+					array_push($sequenciaCodificada, $codon);
+					for ($j=$i+3; $j <=$tam; $j+=3) { 
+						$codon = $codons[$j].$codons[$j+1].$codons[$j+2];
+						if(in_array($codon, $stopCodon)){
+							array_push($sequenciaCodificada, $codon);
+							dicionarioAminoacidos($sequenciaCodificada, $posicaoInicial, $fita);
+							exit();
+						} else{
+							array_push($sequenciaCodificada, $codon);
 						}
 					}
 				}
 			}
-		} else{
-			$fitaPositiva = file('seqNova.txt') or die('Error ao abrir fita positiva');
-			foreach ($fitaPositiva as $value) {
-				$codons = str_split($value);
-				$tam = sizeof($codons);
+		}
+	} else{
+		$fitaPositiva = file('seqNova.txt') or die('Error ao abrir fita positiva');
+		foreach ($fitaPositiva as $value) {
+			$codons = str_split($value);
+			$tam = sizeof($codons);
 
-				for ($i=0; $i <= $tam; $i++) { 
-					$codon = $codons[$i].$codons[$i+1].$codons[$i+2];
-					if ($codon == $startCodon){
-						$posicaoInicial = $i;
-						array_push($sequenciaCodificada, $codon);
-						for ($j=$i+3; $j <=$tam; $j+=3) { 
-							$codon = $codons[$j].$codons[$j+1].$codons[$j+2];
-							if(in_array($codon, $stopCodon)){
-								array_push($sequenciaCodificada, $codon);
-								dicionarioAminoacidos($sequenciaCodificada, $posicaoInicial, $fita);
-								exit();
-							} else{
-								array_push($sequenciaCodificada, $codon);
-							}
+			for ($i=0; $i <= $tam; $i++) { 
+				$codon = $codons[$i].$codons[$i+1].$codons[$i+2];
+				if ($codon == $startCodon){
+					$posicaoInicial = $i;
+					array_push($sequenciaCodificada, $codon);
+					for ($j=$i+3; $j <=$tam; $j+=3) { 
+						$codon = $codons[$j].$codons[$j+1].$codons[$j+2];
+						if(in_array($codon, $stopCodon)){
+							array_push($sequenciaCodificada, $codon);
+							dicionarioAminoacidos($sequenciaCodificada, $posicaoInicial, $fita);
+							exit();
+						} else{
+							array_push($sequenciaCodificada, $codon);
 						}
 					}
 				}
 			}
-		}	
-	}else{
-		encontrarPromotor($posIni, $posFim, $fita, $submit);
-	}	
+		}
+	}		
 }
 
 function encontrarPromotor($posIni, $posFim, $fita){
 
-	$tataBox = ['TATAAT'];
+	$conjuntoPromoter = [];
+	$conjuntoNoPromoter = [];
+	$stringPromoter = "";
+	$promotor =[];
+	$stringNoPromoter = "";
+	$i =0;
+	$promotores = [];
 
 	if($fita == 'negativa'){
 		$sequenciaNegativa = file('complementar.txt') or die("Erro ao abrir complementar");
@@ -299,15 +308,86 @@ function encontrarPromotor($posIni, $posFim, $fita){
 			$base = str_split($value);
 			$tamBase = sizeof($base);
 
-			for ($i=0; $i < $tamBase; $i++) {
+			while ( $i <= 34) {
+				if($base[$i] == 'T' || $base[$i] == 'A'){
+					$stringPromoter = $stringPromoter.$base[$i];
+					if($base[$i+1] != 'T' || $base[$i+1] != 'A'){
+						$stringNoPromoter = $stringNoPromoter.$base[$i];
+						$promotor = array(
+							array('Base' => $stringPromoter, 'Indice' => $i)
+						);	
+						array_push($conjuntoPromoter, $promotor);		
+					} else{
+						for ($j=$i+1; $j <=34 ; $j++) { 
+							$stringPromoter = $stringPromoter.$base[$j];
+							$promotor = array(
+								array('Base' => $stringPromoter, 'Indice' => $j)
+							);	
+						}
+					}
+
+				} else{
+					$stringNoPromoter = $stringNoPromoter.$base[$i];
+					array_push($conjuntoNoPromoter, $stringNoPromoter);
+				}
+				$i++;
+			}
+
+			/*for ($i=0; $i <= 34 ; $i++) {
+				if($base[$i] == 'T' || $base[$i] == 'A'){
+					$stringPromoter = $stringPromoter.$base[$i];
+					for ($j=$i+1; $j <=34 ; $j++) { 
+						if($base[$j] == 'T' || $base[$j] == 'A') {
+							$stringPromoter = $stringPromoter.$base[$j];
+							array_push($conjuntoPromoter, $stringPromoter);						
+						}else{
+
+							$stringNoPromoter = $stringNoPromoter.$base[$i];
+							array_push($conjuntoNoPromoter, $stringNoPromoter);	
+						}
+							
+						}
+
+					
+						
+						/*if($base[$i+1] != 'T' || $base[$i+1] != 'A'){
+							
+							$stringNoPromoter = $stringNoPromoter.$base[$i];
+							for ($j=$i; $j <=34; $j++) { 
+								print_r($j);
+								if($base[$j] == 'T' || $base[$j] == 'A'){
+									print_r($conjuntoPromoter);
+									print_r($stringNoPromoter);
+									exit();
+									array_push($conjuntoNoPromoter, $stringNoPromoter);
+									$stringPromoter = "";
+									$stringPromoter = $stringPromoter.$base[$j];
+								} else{
+									array_push($conjuntoPromoter, $stringPromoter);
+									$stringNoPromoter = "";
+									$stringNoPromoter = $stringNoPromoter.$base[$j];
+								}
+							}
+						} else{
+							$stringPromoter = $stringPromoter.$base[$i];
+						}
+					}
+				} else{
+					$stringNoPromoter = $stringNoPromoter.$base[$i];
+					array_push($conjuntoNoPromoter, $stringNoPromoter);	
+				}
+			}*/
+			/*for ($i=0; $i < $tamBase; $i++) {
 				$promotor = $base[$i].$base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$i+5]; 
 				if(in_array($promotor, $tataBox)){
 					echo "encontrei o promotor";
 					print_r($promotor);
 					exit();
 				}
-			}
+			}*/
 		}
+		print_r($promotor);
+		//print_r($conjuntoPromoter);
 	}else{
 		$sequenciaPositiva = file('seqNova.txt') or die("Erro ao abrir sequencia nova");
 		foreach ($sequenciaPositiva as $value) {
@@ -327,10 +407,11 @@ function encontrarPromotor($posIni, $posFim, $fita){
 }
 
 function realizarRestricao($posicaoInicial, $posicaoFinal, $fita, $submit){
-	$ecoriPos = ['GAATTC']; //o corte deverá ser assim G AATTC
-	$ecoriNeg = ['CTTAAG']; //o corte deverá ser assim CTTAA G
+	$ecoriPos = ['GAATTC']; //o corte deverá ser assim G AATTC [$base]
+	$ecoriNeg = ['CTTAAG']; //o corte deverá ser assim CTTAA G [$base+5]
 	$fragmentos = [];
 	$fragConcat= "";
+	$concatFrag="";
 
 	if($fita == 'negativa'){
 		$fileAberto = file('complementar.txt') or die("Erro ao abrir complementar");
@@ -339,39 +420,63 @@ function realizarRestricao($posicaoInicial, $posicaoFinal, $fita, $submit){
 			$base = str_split($value);
 			$tamBase = sizeof($base);
 
-			for ($i=0; $i < $tamBase; $i++) {
+			for ($i=0; $i < 4744666; $i++) {
 				$fragmento = $base[$i].$base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$i+5]; 
+				$posicao = $base[$i+5];
 				if(in_array($fragmento, $ecoriNeg)){
-					$novoFragArray = explode("G",$fragmento);
-					$novoFrag = implode("", $novoFragArray);
-					$fragConcat = $fragConcat . $novoFrag;
-					array_push($fragmentos, $fragConcat);	
-					print_r($fragmentos);
-					exit();			
+					fazerClivagem($fragmento, $fragmentos, $fragConcat, $fita);
+					for ($j=$i; $j < 4744666; $j++) { 
+						$fragNew = $posicao.$base[$j+1].$base[$j+2].$base[$j+3].$base[$j+4].$base[$j+5]; 
+						if(in_array($fragmento, $ecoriNeg)){
+							fazerClivagem($fragmento, $fragmentos, $concatFrag, $fita);
+							$posicao = $base[$j+5]; 
+						} else{
+							$concatFrag = $concatFrag . $base[$j];
+						}
+					} 
 				} else{
 					$fragConcat = $fragConcat . $base[$i];
-					//array_push($fragmentos, $fragmento);
 				}
 			}
+			print_r($fragmentos);
+			exit();
 		}
-		print_r($fragmentos);
-		exit();
 	} else{
 		$arquivo = file('newCode.txt') or die("Error ao abrir arquivo para realizarRestricao");
 		foreach ($arquivo as $value) {
 			$base = str_split($value);
 			$tamBase = sizeof($base);
 
-			for ($i=0; $i < $tamBase; $i++) {
+			for ($i=0; $i < 4744666; $i++) {
 				$fragmento = $base[$i].$base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$i+5]; 
 				if(in_array($fragmento, $ecoriPos)){
-					array_push($fragmentos, $fragmento);
-					print_r($fragmento);
-					exit();
+					fazerClivagem($fragmento, $fragmentos, $fragConcat, $fita, $posicao);
+					for ($j=$i; $j < 4744666; $j++) { 
+						$fragNew = $letra.$base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$i+5]; 
+					}
+				} else{
+					$fragConcat = $fragConcat . $base[$i];
 				}
 			}
 		}
 	}
+}
+
+
+function fazerClivagem($fragmento, $fragmentos, $fragConcat, $fita){
+	if($fita == 'negativa'){
+		$novoFragArray = explode("G",$fragmento); //explode trasforma a string num array
+		$novoFrag = implode("", $novoFragArray); // tranforma o array numa string
+		$fragConcat = $fragConcat . $novoFrag;
+		array_push($fragmentos, $fragConcat);
+	} else{
+		$novoFragArray = explode("AATTC",$fragmento); //explode trasforma a string num array
+		$novoFrag = implode("", $novoFragArray); // tranforma o array numa string
+		$fragConcat = $fragConcat . $novoFrag;
+		array_push($fragmentos, $fragConcat);
+		$letra = "AATTC";
+		return $letra;
+	}	
 }
 //ECORI G (corte) AATTC
 //		CTTAA (corte) G
