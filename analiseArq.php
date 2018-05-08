@@ -46,8 +46,7 @@ function eliminarLinha($posicaoInicial, $posicaoFinal, $fita, $submit){
 		escreverArquivo($posicaoInicial, $posicaoFinal, $fita, $submit);
 	} else if($submit == 'Encontrar Promotor'){
 		$novaPosicaoInicial = $posicaoInicial - 35; //para encontrar região promotora
-		$novaPosicaoFinal = $posicaoFinal + 35; //para encontrar terminador
-		escreverArquivo($novaPosicaoInicial, $novaPosicaoFinal, $fita, $submit);
+		escreverArquivo($novaPosicaoInicial, $posicaoFinal, $fita, $submit);
 	} else if($submit == 'Realizar Restrição'){
 		if($fita == 'negativa'){
 			gerarComplementar($posicaoInicial, $posicaoFinal, $fita, $submit);
@@ -386,10 +385,10 @@ function realizarRestricao($posicaoInicial, $posicaoFinal, $fita, $submit){
 				$posicao = $base[$i+5];
 				if(in_array($fragmento, $ecoriNeg)){
 					fazerClivagem($fragmento, $fragmentos, $fragConcat, $fita);
-					for ($j=$i; $j < 4744666; $j++) { 
+					for ($j=$i+1; $j < 4744666; $j++) { 
 						$fragNew = $posicao.$base[$j+1].$base[$j+2].$base[$j+3].$base[$j+4].$base[$j+5]; 
-						if(in_array($fragmento, $ecoriNeg)){
-							fazerClivagem($fragmento, $fragmentos, $concatFrag, $fita);
+						if(in_array($fragNew, $ecoriNeg)){
+							fazerClivagem($fragNew, $fragmentos, $concatFrag, $fita);
 							$posicao = $base[$j+5]; 
 						} else{
 							$concatFrag = $concatFrag . $base[$j];
@@ -409,17 +408,24 @@ function realizarRestricao($posicaoInicial, $posicaoFinal, $fita, $submit){
 			$tamBase = sizeof($base);
 
 			for ($i=0; $i < 4744666; $i++) {
-				$fragmento = $base[$i].$base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$i+5]; 
+				$fragmento = $base[$i].$base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$i+5];
 				if(in_array($fragmento, $ecoriPos)){
-					fazerClivagem($fragmento, $fragmentos, $fragConcat, $fita, $posicao);
-					for ($j=$i; $j < 4744666; $j++) { 
-						$fragNew = $letra.$base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$i+5]; 
+					fazerClivagem($fragmento, $fragmentos, $fragConcat, $fita);
+					for ($j=$i+1; $j < 4744666; $j++) { 
+						$fragNew = $base[$i].$base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$j]; 
+						if(in_array($fragNew, $ecoriPos)){
+							fazerClivagem($fragNew, $fragmentos, $concatFrag, $fita);
+						} else{
+							$concatFrag = $concatFrag . $base[$j];
+						}
 					}
 				} else{
 					$fragConcat = $fragConcat . $base[$i];
 				}
 			}
 		}
+		print_r($fragmentos);
+		exit();
 	}
 }
 
@@ -435,8 +441,6 @@ function fazerClivagem($fragmento, $fragmentos, $fragConcat, $fita){
 		$novoFrag = implode("", $novoFragArray); // tranforma o array numa string
 		$fragConcat = $fragConcat . $novoFrag;
 		array_push($fragmentos, $fragConcat);
-		$letra = "AATTC";
-		return $letra;
 	}	
 }
 //ECORI G (corte) AATTC
