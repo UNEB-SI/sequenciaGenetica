@@ -380,12 +380,12 @@ function realizarRestricao($posicaoInicial, $posicaoFinal, $fita, $submit){
 			$base = str_split($value);
 			$tamBase = sizeof($base);
 
-			for ($i=0; $i < 4744666; $i++) {
+			for ($i=0; $i < $tamBase-5; $i++) {
 				$fragmento = $base[$i].$base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$i+5]; 
 				$posicao = $base[$i+5];
 				if(in_array($fragmento, $ecoriNeg)){
 					fazerClivagem($fragmento, $fragmentos, $fragConcat, $fita);
-					for ($j=$i+1; $j < 4744666; $j++) { 
+					for ($j=$i+1; $j < $tamBase-5; $j++) { 
 						$fragNew = $posicao.$base[$j+1].$base[$j+2].$base[$j+3].$base[$j+4].$base[$j+5]; 
 						if(in_array($fragNew, $ecoriNeg)){
 							fazerClivagem($fragNew, $fragmentos, $concatFrag, $fita);
@@ -407,14 +407,18 @@ function realizarRestricao($posicaoInicial, $posicaoFinal, $fita, $submit){
 			$base = str_split($value);
 			$tamBase = sizeof($base);
 
-			for ($i=0; $i < 4744666; $i++) {
+			for ($i=0; $i < $tamBase-5; $i++) {
 				$fragmento = $base[$i].$base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$i+5];
 				if(in_array($fragmento, $ecoriPos)){
 					fazerClivagem($fragmento, $fragmentos, $fragConcat, $fita);
-					for ($j=$i+1; $j < 4744666; $j++) { 
-						$fragNew = $base[$i].$base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$j]; 
+					$fragNew = $base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$i+5].$base[$i+6];
+					$fragConcat = $fragConcat . $fragNew;
+					for ($j=$i+1; $j < $tamBase-5; $j++) { 
+						$fragNew = $base[$j].$base[$j+1].$base[$j+2].$base[$j+3].$base[$j+4].$base[$j+5]; 
 						if(in_array($fragNew, $ecoriPos)){
 							fazerClivagem($fragNew, $fragmentos, $concatFrag, $fita);
+							$fragNew = $base[$j+1].$base[$j+2].$base[$j+3].$base[$j+4].$base[$j+5].$base[$j+6];
+							$concatFrag = $concatFrag . $fragNew;
 						} else{
 							$concatFrag = $concatFrag . $base[$j];
 						}
@@ -423,25 +427,24 @@ function realizarRestricao($posicaoInicial, $posicaoFinal, $fita, $submit){
 					$fragConcat = $fragConcat . $base[$i];
 				}
 			}
+			
+				exit();
 		}
-		print_r($fragmentos);
-		exit();
 	}
 }
 
 
 function fazerClivagem($fragmento, $fragmentos, $fragConcat, $fita){
 	if($fita == 'negativa'){
-		$novoFragArray = explode("G",$fragmento); //explode trasforma a string num array
-		$novoFrag = implode("", $novoFragArray); // tranforma o array numa string
-		$fragConcat = $fragConcat . $novoFrag;
-		array_push($fragmentos, $fragConcat);
+		$novoFragArray = explode("G",$fragmento); //explode trasforma a string num array	
 	} else{
 		$novoFragArray = explode("AATTC",$fragmento); //explode trasforma a string num array
-		$novoFrag = implode("", $novoFragArray); // tranforma o array numa string
-		$fragConcat = $fragConcat . $novoFrag;
-		array_push($fragmentos, $fragConcat);
+		var_dump($novoFragArray);
 	}	
+
+	$novoFrag = implode("", $novoFragArray); // tranforma o array numa string
+	$fragConcat = $fragConcat . $novoFrag;
+	array_push($fragmentos, $fragConcat);
 }
 //ECORI G (corte) AATTC
 //		CTTAA (corte) G
