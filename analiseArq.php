@@ -89,9 +89,17 @@ function escreverArquivo($posIni, $posFim, $fita, $submit){
 	fclose($file);
 
 	if($fita == 'negativa'){
-		gerarComplementar($posIni, $posFim, $fita, $submit);
-	} else{
-		encontrarAminoacido($posIni, $posFim, $fita, $submit);
+		if($submit == 'Analisar Sequência' || $submit == 'Encontrar Promotor'){
+			gerarComplementar($posIni, $posFim, $fita, $submit);
+		} 		
+	} 
+
+	if($fita == 'positiva'){
+		if($submit == 'Encontrar Promotor'){
+			encontrarPromotor($posIni, $posFim, $fita);
+		} else{
+			encontrarAminoacido($posIni, $posFim, $fita, $submit);
+		}		
 	}	
 }
 
@@ -100,7 +108,7 @@ function gerarComplementar($posIni, $posFim, $fita, $submit){
 	$complementar = 'complementar.txt';
 	$novo = fopen($complementar, 'a');
 
-	if($submit == 'Analisar Sequência'){
+	if($submit == 'Analisar Sequência' || $submit == 'Encontrar Promotor'){
 		$arquivo = file_get_contents('seqNova.txt')or die("Error");
 		$arqvInvert = strrev($arquivo);
 		$arquivoInvertido = file_put_contents('arquivoInvertido.txt', $arqvInvert);
@@ -312,96 +320,49 @@ function encontrarPromotor($posIni, $posFim, $fita){
 				if($base[$i] == 'T' || $base[$i] == 'A'){
 					$stringPromoter = $stringPromoter.$base[$i];
 					if($base[$i+1] != 'T' || $base[$i+1] != 'A'){
-						$stringNoPromoter = $stringNoPromoter.$base[$i];
-						$promotor = array(
-							array('Base' => $stringPromoter, 'Indice' => $i)
-						);	
+						$stringPromoter = $stringPromoter."</br>";
+						$promotor = array('Base' => $stringPromoter);	
 						array_push($conjuntoPromoter, $promotor);		
 					} else{
-						for ($j=$i+1; $j <=34 ; $j++) { 
+						for ($j=$i+1; $j <=34 ; $j++) {
 							$stringPromoter = $stringPromoter.$base[$j];
-							$promotor = array(
-								array('Base' => $stringPromoter, 'Indice' => $j)
-							);	
+							$promotor = array('Base' => $stringPromoter);	
 						}
 					}
-
-				} else{
-					$stringNoPromoter = $stringNoPromoter.$base[$i];
-					array_push($conjuntoNoPromoter, $stringNoPromoter);
+				}else{
+					$stringPromoter = $stringPromoter."</br>";
+					array_push($conjuntoPromoter, $promotor);
 				}
 				$i++;
 			}
-
-			/*for ($i=0; $i <= 34 ; $i++) {
-				if($base[$i] == 'T' || $base[$i] == 'A'){
-					$stringPromoter = $stringPromoter.$base[$i];
-					for ($j=$i+1; $j <=34 ; $j++) { 
-						if($base[$j] == 'T' || $base[$j] == 'A') {
-							$stringPromoter = $stringPromoter.$base[$j];
-							array_push($conjuntoPromoter, $stringPromoter);						
-						}else{
-
-							$stringNoPromoter = $stringNoPromoter.$base[$i];
-							array_push($conjuntoNoPromoter, $stringNoPromoter);	
-						}
-							
-						}
-
-					
-						
-						/*if($base[$i+1] != 'T' || $base[$i+1] != 'A'){
-							
-							$stringNoPromoter = $stringNoPromoter.$base[$i];
-							for ($j=$i; $j <=34; $j++) { 
-								print_r($j);
-								if($base[$j] == 'T' || $base[$j] == 'A'){
-									print_r($conjuntoPromoter);
-									print_r($stringNoPromoter);
-									exit();
-									array_push($conjuntoNoPromoter, $stringNoPromoter);
-									$stringPromoter = "";
-									$stringPromoter = $stringPromoter.$base[$j];
-								} else{
-									array_push($conjuntoPromoter, $stringPromoter);
-									$stringNoPromoter = "";
-									$stringNoPromoter = $stringNoPromoter.$base[$j];
-								}
-							}
-						} else{
-							$stringPromoter = $stringPromoter.$base[$i];
-						}
-					}
-				} else{
-					$stringNoPromoter = $stringNoPromoter.$base[$i];
-					array_push($conjuntoNoPromoter, $stringNoPromoter);	
-				}
-			}*/
-			/*for ($i=0; $i < $tamBase; $i++) {
-				$promotor = $base[$i].$base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$i+5]; 
-				if(in_array($promotor, $tataBox)){
-					echo "encontrei o promotor";
-					print_r($promotor);
-					exit();
-				}
-			}*/
+			print_r($promotor);
 		}
-		print_r($promotor);
-		//print_r($conjuntoPromoter);
 	}else{
 		$sequenciaPositiva = file('seqNova.txt') or die("Erro ao abrir sequencia nova");
 		foreach ($sequenciaPositiva as $value) {
 			$base = str_split($value);
 			$tamBase = sizeof($base);
-
-			for ($i=0; $i < $tamBase; $i++) {
-				$promotor = $base[$i].$base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$i+5]; 
-				if(in_array($promotor, $tataBox)){
-					echo "encontrei o promotor";
-					print_r($promotor);
-					exit();
+			
+			while ( $i <= 34) {
+				if($base[$i] == 'T' || $base[$i] == 'A'){
+					$stringPromoter = $stringPromoter.$base[$i];
+					if($base[$i+1] != 'T' || $base[$i+1] != 'A'){
+						$stringPromoter = $stringPromoter."</br>";
+						$promotor = array('Base' => $stringPromoter);	
+						array_push($conjuntoPromoter, $promotor);		
+					} else{
+						for ($j=$i+1; $j <=34 ; $j++) {
+							$stringPromoter = $stringPromoter.$base[$j];
+							$promotor = array('Base' => $stringPromoter);
+						}
+					}
+				}else{
+					$stringPromoter = $stringPromoter."</br>";
+					array_push($conjuntoPromoter, $promotor);
 				}
+				$i++;
 			}
+			print_r($conjuntoPromoter);
 		}
 	}
 }
