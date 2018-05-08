@@ -378,93 +378,31 @@ function realizarRestricao($posicaoInicial, $posicaoFinal, $fita, $submit){
 	$ecoriNeg = ['CTTAAG']; //o corte deverá ser assim CTTAA G [$base+5]
 	$fragmentos = [];
 	$fragConcat= "";
-	$concatFrag="";
-	$fragIndices = [];
-	$posicoes = [];
 	$posicaoI= 0;
-	/*if($fita == 'negativa'){
-		$fileAberto = file('complementar.txt') or die("Erro ao abrir complementar");
-		
-		foreach ($fileAberto as $value) {
-			$base = str_split($value);
-			$tamBase = sizeof($base);
 
-			for ($i=0; $i < $tamBase-5; $i++) {
-				$fragmento = $base[$i].$base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$i+5]; 
-				$posicao = $base[$i+5];
-				if(in_array($fragmento, $ecoriNeg)){
-					fazerClivagem($fragmento, $fragmentos, $fragConcat, $fita);
-					for ($j=$i+1; $j < $tamBase-5; $j++) { 
-						$fragNew = $posicao.$base[$j+1].$base[$j+2].$base[$j+3].$base[$j+4].$base[$j+5]; 
-						if(in_array($fragNew, $ecoriNeg)){
-							fazerClivagem($fragNew, $fragmentos, $concatFrag, $fita);
-							$posicao = $base[$j+5]; 
-						} else{
-							$concatFrag = $concatFrag . $base[$j];
-						}
-					} 
-				} else{
-					$fragConcat = $fragConcat . $base[$i];
-				}
-			}
-			print_r($fragmentos);
-			exit();
-		}
-	} else{*/
-		$arquivo = file('newCode.txt') or die("Error ao abrir arquivo para realizarRestricao");
-		foreach ($arquivo as $value) {
-			$base = str_split($value);
-			$tamBase = sizeof($base);
+	$arquivo = file('newCode.txt') or die("Error ao abrir arquivo para realizarRestricao");
+	foreach ($arquivo as $value) {
+		$base = str_split($value);
+		$tamBase = sizeof($base);
 
-			for ($i=0; $i < $tamBase-5; $i++) {
-				$fragmento = $base[$i].$base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$i+5];
-				if(in_array($fragmento, $ecoriPos)){
-					$posicaoF = $i;
-					//echo $i . "</br>";
-					$frag = fazerClivagem($fragmento, $fragConcat);					
-					$frags = array('inicio' => $posicaoI, 'final' => $posicaoF, 'fragmento' => $frag);
-					array_push($fragmentos, $frags); 
-					$posicaoI = $posicaoF +1;
-					//$fragReturn = fazerClivagem($fragmento, $fragmentos, $fragConcat, $fita);
-					$fragNew = $base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$i+5].$base[$i+6];			
-					$fragConcat = "";		
-					$fragConcat = $fragConcat . $fragNew;
-					
-
-					
-
-
-
-
-					//print_r($posicoes);
-					
-
-					/*for ($j=$i+1; $j < $tamBase-5; $j++) { 
-						$fragNew = $base[$j].$base[$j+1].$base[$j+2].$base[$j+3].$base[$j+4].$base[$j+5]; 
-						if(in_array($fragNew, $ecoriPos)){
-							$fragReturn  = fazerClivagem($fragNew, $fragmentos, $concatFrag, $fita);
-							$fragNew = $base[$j+1].$base[$j+2].$base[$j+3].$base[$j+4].$base[$j+5].$base[$j+6];
-							$concatFrag = "";
-							$concatFrag = $concatFrag . $fragNew;
-							print_r($fragReturn);
-							exit();
-						} else{
-							$concatFrag = $concatFrag . $base[$j];
-						}
-					}*/
-				} else{
-					$fragConcat = $fragConcat . $base[$i];			
-				}
-			}
-
-			gerarTable($fragmentos);
-
-			
-				//print_r($fragReturn);
-					//exit();
+		for ($i=0; $i < $tamBase-5; $i++) {
+			$fragmento = $base[$i].$base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$i+5];
+			if(in_array($fragmento, $ecoriPos)){
+				$posicaoF = $i;
+				$frag = fazerClivagem($fragmento, $fragConcat);					
+				$frags = array('inicio' => $posicaoI, 'final' => $posicaoF, 'fragmento' => $frag);
+				array_push($fragmentos, $frags); 
+				$posicaoI = $posicaoF +1;
+				$fragNew = $base[$i+1].$base[$i+2].$base[$i+3].$base[$i+4].$base[$i+5].$base[$i+6];			
+				$fragConcat = "";		
+				$fragConcat = $fragConcat . $fragNew;
 				
+			} else{
+				$fragConcat = $fragConcat . $base[$i];			
+			}
 		}
-	//}
+		geneEstudado($fragmentos, $posicaoInicial, $posicaoFinal);				
+	}
 }
 
 function fazerClivagem($fragmento, $fragConcat){
@@ -475,21 +413,22 @@ function fazerClivagem($fragmento, $fragConcat){
 }
 
 function gerarTable($fragmentos){
-	echo "<table class='table table-responsive'>";
+	echo "<div class='container'>";
+	echo "<table class='table table-bordered table-hover'>";
 	echo "    <thead>";
 	echo "    	<tr>";
-	echo "        <td>";
+	echo "        <th>";
 	echo "            Indice";
-	echo "        </td>";
+	echo "        </th>";
 	/*echo "        <td>";
 	echo "            Fragmento";
 	echo "        </td>";*/
-	echo "        <td>";
+	echo "        <th>";
 	echo "            Posicao Inicial";
-	echo "        </td>";
-	echo "        <td>";
+	echo "        </th>";
+	echo "        <th>";
 	echo "            Posicao Final";
-	echo "        </td>";
+	echo "        </th>";
 	echo "    	</tr>";
 	echo "    </thead>";
 	echo "    </tbody>";
@@ -512,6 +451,33 @@ function gerarTable($fragmentos){
 	}
 	echo "	</tbody>";
 	echo "</table>";
+	echo "</div>";
+}
+
+function geneEstudado($fragmentos, $posicaoInicial, $posicaoFinal){
+	$posicoesFrag = [];
+	$tamFrag = 0;
+	$count = 0;
+	$i = 0;
+
+	foreach ($fragmentos as $key => $value) {
+		$tamFrag = strlen($value['fragmento']);
+		$count = $count + $tamFrag;
+		if($count >= $posicaoInicial && $count <= $posicaoFinal){
+			echo "<div class='container'>";
+			echo   "<div class='panel panel-success'>";
+			echo    "<div class='panel-heading'>Gene em Estudo</div>";
+      		echo		"<div class='panel-body'>";
+      		echo            "O gene em estudo se encontra a partir da posição inicial ".$value['inicio'] ."
+				            do ". $key . "º fragmento";	
+      		echo        "</div>";
+      		echo    "</div>";      		
+    		echo  "</div>";
+    		echo "</div>";
+			echo "</br>";
+		}
+	}
+	gerarTable($fragmentos);
 }
 
 ?>
