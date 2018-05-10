@@ -53,13 +53,13 @@ function eliminarLinha($posicaoInicial, $posicaoFinal, $fita, $submit, $w){
 	}
 
 	if($submit == 'Analisar Sequência'){
-		escreverArquivo($posicaoInicial, $posicaoFinal, $fita, $submit);
+		escreverArquivo($posicaoInicial, $posicaoFinal, $fita, $submit, $w);
 	} else if($submit == 'Encontrar Promotor'){
 		$novaPosicaoInicial = $posicaoInicial - $w; //para encontrar região promotora W == valor variável
-		escreverArquivo($posicaoInicial, $posicaoFinal, $fita, $submit);
+		escreverArquivo($posicaoInicial, $posicaoFinal, $fita, $submit, $w);
 	} else if($submit == 'Realizar Restrição'){
 		if($fita == 'negativa'){
-			gerarComplementar($posicaoInicial, $posicaoFinal, $fita, $submit);
+			gerarComplementar($posicaoInicial, $posicaoFinal, $fita, $submit, $w);
 		} else{
 			realizarRestricao($posicaoInicial, $posicaoFinal, $fita, $submit);
 		}
@@ -68,7 +68,7 @@ function eliminarLinha($posicaoInicial, $posicaoFinal, $fita, $submit, $w){
 	}	
 }
 
-function escreverArquivo($posIni, $posFim, $fita, $submit){
+function escreverArquivo($posIni, $posFim, $fita, $submit, $w){
 	$aux = 0;
 	$count = $posIni;
 	$seqNova = 'seqNova.txt';
@@ -96,20 +96,20 @@ function escreverArquivo($posIni, $posFim, $fita, $submit){
 
 	if($fita == 'negativa'){
 		if($submit == 'Analisar Sequência' || $submit == 'Encontrar Promotor'){
-			gerarComplementar($posIni, $posFim, $fita, $submit);
+			gerarComplementar($posIni, $posFim, $fita, $submit, $w);
 		} 		
 	} 
 
 	if($fita == 'positiva'){
 		if($submit == 'Encontrar Promotor'){
-			encontrarPromotor($posIni, $posFim, $fita);
+			encontrarPromotor($posIni, $posFim, $fita, $w);
 		} else{
 			encontrarAminoacido($posIni, $posFim, $fita, $submit);
 		}		
 	}	
 }
 
-function gerarComplementar($posIni, $posFim, $fita, $submit){
+function gerarComplementar($posIni, $posFim, $fita, $submit, $w){
 
 	$complementar = 'complementar.txt';
 	$novo = fopen($complementar, 'a');
@@ -152,7 +152,7 @@ function gerarComplementar($posIni, $posFim, $fita, $submit){
 	} else if($submit == 'Realizar Restrição'){
 		realizarRestricao($posIni, $posFim, $fita, $submit);
 	} else{
-		encontrarPromotor($posIni, $posFim, $fita);
+		encontrarPromotor($posIni, $posFim, $fita, $w);
 	}	
 }
 
@@ -280,7 +280,7 @@ function encontrarAminoacido($posIni, $posFim, $fita, $submit){
 	}		
 }
 
-function encontrarPromotor($posIni, $posFim, $fita){
+function encontrarPromotor($posIni, $posFim, $fita, $w){
 
 	$conjuntoPromoter = [];
 	$conjuntoNoPromoter = [];
