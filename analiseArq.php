@@ -52,8 +52,11 @@ function eliminarLinha($posicaoInicial, $posicaoFinal, $fita, $submit, $w){
 		$writeArq = fwrite($file, $string);		
 	}
 
-	if($submit == 'Analisar Sequência' || $submit == 'Encontrar Promotor'){
-		escreverArquivo($posicaoInicial, $posicaoFinal, $fita, $submit, $w);
+	if($submit == 'Analisar Sequência'){
+		escreverArquivo($posicaoInicial, $posicaoFinal, $fita, $submit);
+	} else if($submit == 'Encontrar Promotor'){
+		$novaPosicaoInicial = $posicaoInicial - $w; //para encontrar região promotora W == valor variável
+		escreverArquivo($posicaoInicial, $posicaoFinal, $fita, $submit);
 	} else if($submit == 'Realizar Restrição'){
 		if($fita == 'negativa'){
 			gerarComplementar($posicaoInicial, $posicaoFinal, $fita, $submit);
@@ -65,7 +68,7 @@ function eliminarLinha($posicaoInicial, $posicaoFinal, $fita, $submit, $w){
 	}	
 }
 
-function escreverArquivo($posIni, $posFim, $fita, $submit, $w){
+function escreverArquivo($posIni, $posFim, $fita, $submit){
 	$aux = 0;
 	$count = $posIni;
 	$seqNova = 'seqNova.txt';
@@ -99,7 +102,7 @@ function escreverArquivo($posIni, $posFim, $fita, $submit, $w){
 
 	if($fita == 'positiva'){
 		if($submit == 'Encontrar Promotor'){
-			encontrarPromotor($posIni, $posFim, $fita, $w);
+			encontrarPromotor($posIni, $posFim, $fita);
 		} else{
 			encontrarAminoacido($posIni, $posFim, $fita, $submit);
 		}		
@@ -277,7 +280,7 @@ function encontrarAminoacido($posIni, $posFim, $fita, $submit){
 	}		
 }
 
-function encontrarPromotor($posIni, $posFim, $fita, $w){
+function encontrarPromotor($posIni, $posFim, $fita){
 
 	$conjuntoPromoter = [];
 	$conjuntoNoPromoter = [];
@@ -286,8 +289,6 @@ function encontrarPromotor($posIni, $posFim, $fita, $w){
 	$stringNoPromoter = "";
 	$i =0;
 	$promotores = [];
-
-	$novaPosicaoInicial = $posIni - $w; //para encontrar região promotora W == valor variável
 
 	if($fita == 'negativa'){
 		$arquivo = file('complementar.txt') or die("Erro ao abrir complementar");
