@@ -24,7 +24,8 @@ if (!empty($_POST)) {
 		} else if (isset($_POST['encontrarPromotor']) && isset($_POST['w'])){
 			$submit = $_POST['encontrarPromotor'];
 			$w = $_POST['w'];
-			eliminarLinha($posicaoInicial, $posicaoFinal, $fita, $submit, $w);		
+			$novaPosicaoInicial = $posicaoInicial - $w;
+			eliminarLinha($novaPosicaoInicial, $posicaoFinal, $fita, $submit, $w);		
 		} else if(isset($_POST['realizarRestricao'])){
 			$submit = $_POST['realizarRestricao'];
 			$w = 0;
@@ -281,14 +282,12 @@ function encontrarAminoacido($posIni, $posFim, $fita, $submit){
 }
 
 function encontrarPromotor($posIni, $posFim, $fita, $w){
-
-	$conjuntoPromoter = [];
-	$conjuntoNoPromoter = [];
 	$stringPromoter = "";
 	$promotor =[];
-	$stringNoPromoter = "";
-	$i =0;
+	$posicaoInicialPromotor = 0;
 	$promotores = [];
+	$arrayPromoter = [];
+	$aux = [];
 
 	if($fita == 'negativa'){
 		$arquivo = file('complementar.txt') or die("Erro ao abrir complementar");
@@ -297,31 +296,39 @@ function encontrarPromotor($posIni, $posFim, $fita, $w){
 	}
 
 	foreach ($arquivo as $value) {
-			$base = str_split($value);
-			$tamBase = sizeof($base);
+		$base = str_split($value);
+		for($i = 1; $i<= $w; $i++){
+			$posicaoInicialPromotor = $i;
+			if($base[$i] == 'T' || $base[$i] == 'A'){
+				$stringPromoter = $stringPromoter.$base[$i];
+			} else{
+				$promotor = array('Posicao' => "-".$posicaoInicialPromotor, 'Promotor' => $stringPromoter);
+				array_push($promotores, $promotor); 
+				$stringPromoter="";
+			}	
+		}	
+	}
+	$aux = $promotores[0];
+	$tamP = strlen($aux['Promotor']);
 
-			while ( $i <= 34) {
-				if($base[$i] == 'T' || $base[$i] == 'A'){
-					$stringPromoter = $stringPromoter.$base[$i];
-					if($base[$i+1] != 'T' || $base[$i+1] != 'A'){
-						$stringPromoter = $stringPromoter."</br>";
-						$promotor = array('Base' => $stringPromoter);	
-						array_push($conjuntoPromoter, $promotor);		
-					} else{
-						for ($j=$i+1; $j <=34 ; $j++) {
-							$stringPromoter = $stringPromoter.$base[$j];
-							$promotor = array('Base' => $stringPromoter);	
-						}
-					}
-				}else{
-					$stringPromoter = $stringPromoter."</br>";
-					array_push($conjuntoPromoter, $promotor);
-				}
-				$i++;
-			}
-			print_r($promotor);
-		}
-}
+	foreach (next($promotores) as $key => $promotor) {
+		if(!empty($promotores)){
+			next($promotores);
+			current($promotores);
+			print_r($promotores);
+			exit();
+			$tamPromotor = strlen($promotor['Promotor']);
+			if($tamP >= $tamPromotor){
+				$regiaoPromotora = array('Posicao do Promotor' => $promotor['Posicao'], 'Promotor' => $promotor['Promotor']);
+				array_push($arrayPromoter, $regiaoPromotora); 
+			}else{
+				$tamP = $tamPromotor;
+				$tamPromotor = 0;
+			}			
+		}		
+		//print_r($arrayPromoter);	
+	}
+}	
 
 function realizarRestricao($posicaoInicial, $posicaoFinal, $fita, $submit){
 	$ecoriPos = ['GAATTC']; //o corte deverá ser assim G AATTC [$base]
@@ -370,9 +377,6 @@ function gerarTable($fragmentos){
 	echo "        <th>";
 	echo "            Indice";
 	echo "        </th>";
-	/*echo "        <td>";
-	echo "            Fragmento";
-	echo "        </td>";*/
 	echo "        <th>";
 	echo "            Posicao Inicial";
 	echo "        </th>";
@@ -388,9 +392,6 @@ function gerarTable($fragmentos){
 	    echo "   <td>";
 		echo 		$key;
 	    echo "   </td>";
-	    /*echo "   <td>";
-	    print_r  ($value['fragmento']);
-	    echo "   </td>";*/
 	    echo "   <td>";
 	    print_r  ($value['inicio']);
 	    echo "   </td>";
@@ -399,6 +400,7 @@ function gerarTable($fragmentos){
 	    echo "   </td>";
 	    echo "</tr>";
 	}
+	
 	echo "	</tbody>";
 	echo "</table>";
 	echo "</div>";
@@ -410,7 +412,7 @@ function geneEstudado($fragmentos, $posicaoInicial, $posicaoFinal){
 	$count = 0;
 
 	foreach ($fragmentos as $key => $value) {
-		$tamFrag = strlen($value['fragmento']);4
+		$tamFrag = strlen($value['fragmento']);
 		$count = $count + $tamFrag;
 		if($count >= $posicaoInicial && $count <= $posicaoFinal){
 			echo "<div class='container'>";
