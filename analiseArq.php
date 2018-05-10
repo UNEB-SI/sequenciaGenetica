@@ -19,6 +19,7 @@ if (!empty($_POST)) {
 			$posicaoFinal = $_POST["posicaoFinal"];
 		if(isset($_POST['analisarSequencia'])){ 
 			$submit = $_POST['analisarSequencia'];
+			$w = 0;
 		    eliminarLinha($posicaoInicial, $posicaoFinal, $fita, $submit, $w);
 		} else if (isset($_POST['encontrarPromotor']) && isset($_POST['w'])){
 			$submit = $_POST['encontrarPromotor'];
@@ -26,6 +27,7 @@ if (!empty($_POST)) {
 			eliminarLinha($posicaoInicial, $posicaoFinal, $fita, $submit, $w);		
 		} else if(isset($_POST['realizarRestricao'])){
 			$submit = $_POST['realizarRestricao'];
+			$w = 0;
 			eliminarLinha($posicaoInicial, $posicaoFinal, $fita, $submit, $w);	
 		} else{
 			echo "Não houve submit no formulário";
@@ -50,11 +52,8 @@ function eliminarLinha($posicaoInicial, $posicaoFinal, $fita, $submit, $w){
 		$writeArq = fwrite($file, $string);		
 	}
 
-	if($submit == 'Analisar Sequência'){
-		escreverArquivo($posicaoInicial, $posicaoFinal, $fita, $submit);
-	} else if($submit == 'Encontrar Promotor'){
-		$novaPosicaoInicial = $posicaoInicial - $w; //para encontrar região promotora W == valor variável
-		escreverArquivo($novaPosicaoInicial, $posicaoFinal, $fita, $submit);
+	if($submit == 'Analisar Sequência' || $submit == 'Encontrar Promotor'){
+		escreverArquivo($posicaoInicial, $posicaoFinal, $fita, $submit, $w);
 	} else if($submit == 'Realizar Restrição'){
 		if($fita == 'negativa'){
 			gerarComplementar($posicaoInicial, $posicaoFinal, $fita, $submit);
@@ -66,7 +65,7 @@ function eliminarLinha($posicaoInicial, $posicaoFinal, $fita, $submit, $w){
 	}	
 }
 
-function escreverArquivo($posIni, $posFim, $fita, $submit){
+function escreverArquivo($posIni, $posFim, $fita, $submit, $w){
 	$aux = 0;
 	$count = $posIni;
 	$seqNova = 'seqNova.txt';
@@ -100,7 +99,7 @@ function escreverArquivo($posIni, $posFim, $fita, $submit){
 
 	if($fita == 'positiva'){
 		if($submit == 'Encontrar Promotor'){
-			encontrarPromotor($posIni, $posFim, $fita);
+			encontrarPromotor($posIni, $posFim, $fita, $w);
 		} else{
 			encontrarAminoacido($posIni, $posFim, $fita, $submit);
 		}		
@@ -278,7 +277,7 @@ function encontrarAminoacido($posIni, $posFim, $fita, $submit){
 	}		
 }
 
-function encontrarPromotor($posIni, $posFim, $fita){
+function encontrarPromotor($posIni, $posFim, $fita, $w){
 
 	$conjuntoPromoter = [];
 	$conjuntoNoPromoter = [];
@@ -288,9 +287,15 @@ function encontrarPromotor($posIni, $posFim, $fita){
 	$i =0;
 	$promotores = [];
 
+	$novaPosicaoInicial = $posIni - $w; //para encontrar região promotora W == valor variável
+
 	if($fita == 'negativa'){
-		$sequenciaNegativa = file('complementar.txt') or die("Erro ao abrir complementar");
-		foreach ($sequenciaNegativa as $value) {
+		$arquivo = file('complementar.txt') or die("Erro ao abrir complementar");
+	}else{
+		$arquivo = file('seqNova.txt') or die("Erro ao abrir sequencia nova");
+	}
+
+	foreach ($arquivo as $value) {
 			$base = str_split($value);
 			$tamBase = sizeof($base);
 
@@ -315,34 +320,6 @@ function encontrarPromotor($posIni, $posFim, $fita){
 			}
 			print_r($promotor);
 		}
-	}else{
-		$sequenciaPositiva = file('seqNova.txt') or die("Erro ao abrir sequencia nova");
-		foreach ($sequenciaPositiva as $value) {
-			$base = str_split($value);
-			$tamBase = sizeof($base);
-			
-			while ( $i <= 34) {
-				if($base[$i] == 'T' || $base[$i] == 'A'){
-					$stringPromoter = $stringPromoter.$base[$i];
-					if($base[$i+1] != 'T' || $base[$i+1] != 'A'){
-						$stringPromoter = $stringPromoter."</br>";
-						$promotor = array('Base' => $stringPromoter);	
-						array_push($conjuntoPromoter, $promotor);		
-					} else{
-						for ($j=$i+1; $j <=34 ; $j++) {
-							$stringPromoter = $stringPromoter.$base[$j];
-							$promotor = array('Base' => $stringPromoter);
-						}
-					}
-				}else{
-					$stringPromoter = $stringPromoter."</br>";
-					array_push($conjuntoPromoter, $promotor);
-				}
-				$i++;
-			}
-			print_r($promotor);
-		}
-	}
 }
 
 function realizarRestricao($posicaoInicial, $posicaoFinal, $fita, $submit){
@@ -430,10 +407,9 @@ function geneEstudado($fragmentos, $posicaoInicial, $posicaoFinal){
 	$posicoesFrag = [];
 	$tamFrag = 0;
 	$count = 0;
-	$i = 0;
 
 	foreach ($fragmentos as $key => $value) {
-		$tamFrag = strlen($value['fragmento']);
+		$tamFrag = strlen($value['fragmento']);4
 		$count = $count + $tamFrag;
 		if($count >= $posicaoInicial && $count <= $posicaoFinal){
 			echo "<div class='container'>";
