@@ -298,8 +298,8 @@ function encontrarPromotor($posIni, $posFim, $fita, $w){
 	foreach ($arquivo as $value) {
 		$base = str_split($value);
 		for($i = 1; $i<= $w; $i++){
-			$posicaoInicialPromotor = $i;
 			if($base[$i] == 'T' || $base[$i] == 'A'){
+				$posicaoInicialPromotor = $i;
 				$stringPromoter = $stringPromoter.$base[$i];
 			} else{
 				$promotor = array('Posicao' => "-".$posicaoInicialPromotor, 'Promotor' => $stringPromoter);
@@ -308,26 +308,44 @@ function encontrarPromotor($posIni, $posFim, $fita, $w){
 			}	
 		}	
 	}
-	$aux = $promotores[0];
-	$tamP = strlen($aux['Promotor']);
+	$tamArray = sizeof($promotores);
 
-	foreach (next($promotores) as $key => $promotor) {
-		if(!empty($promotores)){
-			next($promotores);
-			current($promotores);
-			print_r($promotores);
-			exit();
-			$tamPromotor = strlen($promotor['Promotor']);
-			if($tamP >= $tamPromotor){
-				$regiaoPromotora = array('Posicao do Promotor' => $promotor['Posicao'], 'Promotor' => $promotor['Promotor']);
-				array_push($arrayPromoter, $regiaoPromotora); 
-			}else{
-				$tamP = $tamPromotor;
+	for ($i=0; $i < $tamArray; $i++) { 
+		$prom = $promotores[$i];
+		$aux = $promotores[$i+1];
+		$tamPromotor = strlen($prom['Promotor']);
+		$tamP = strlen($aux['Promotor']);
+		if($tamP != 0 && $tamPromotor !=0){
+			if($tamPromotor > $tamP){
+				$seq = $tamPromotor;
+				$promoter = $prom['Promotor'];
+				$pos = $prom['Posicao'];
+			}elseif($tamP > $tamPromotor){
+				$seq = $tamP;
+				$promoter = $prom['Promotor'];
+				$pos = $prom['Posicao'];
+			} else{
+				$promoter = array('Promotor' => $prom['Promotor'], 'Posicao' => $prom['Posicao']);
+				$promoter2 = array('Promotor' => $aux['Promotor'], 'Posicao' => $aux['Posicao']);
+				array_push($arrayPromoter, $promoter);
+				array_push($arrayPromoter, $promoter2);
+				$tamP = 0;
 				$tamPromotor = 0;
-			}			
-		}		
-		//print_r($arrayPromoter);	
+			}
+		}			
 	}
+	print_r($arrayPromoter);	
+	/*foreach (next($promotores) as $key => $promotor) {
+		print_r($promotores);
+		print_r($key);
+		print_r($promotor);
+		print_r($promotores[1]['Posicao']);
+		print_r($promotores[1]['Promotor']);
+		exit();
+		
+				
+		//print_r($arrayPromoter);	
+	}*/
 }	
 
 function realizarRestricao($posicaoInicial, $posicaoFinal, $fita, $submit){
